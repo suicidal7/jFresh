@@ -23,10 +23,22 @@ jFresh.fn.SocketIO = function( el, opts ) {
 		}
 	};
 	
+	me.skt.on('autherror', function(nfo) {
+		console.log('autherror', nfo);
+		var p = me.el.parent(me.opts.authRoot);
+		if ( p ) {
+			p.classList.add( me.opts.authClass );
+		}
+		else {
+			console.log('SocketIO parent not found:', me.el, me.opts.authRoot);
+		}
+	});
+	
 	me.skt.on('sessionKey', function(nfo) {
 		localStorage.userKey = nfo.key;
 		localStorage.user = nfo.user;
 		me.is_open = true;
+		me.el.parent(me.opts.authRoot).classList.remove( me.opts.authClass );
 		serveCallbacks('sessionKey', nfo);
 		
 		//send Queued
@@ -52,6 +64,10 @@ jFresh.fn.SocketIO = function( el, opts ) {
 		if ( localStorage.userKey ) {
 			me.skt.emit('relog', localStorage.userKey);
 		}
+		else {
+			var p = me.el.parent(me.opts.authRoot);
+			if ( p ) p.classList.add( me.opts.authClass );
+		}
 	});
 	
 	me.skt.on('reconnect', function() {
@@ -60,6 +76,12 @@ jFresh.fn.SocketIO = function( el, opts ) {
 		}
 	});
 	//~ return skt;
+};
+
+jFresh.fn.SocketIO.defaults = {
+	'host': document.location.origin.replace('http://','ws://').replace('https://','wss://'),
+	authRoot: '.desktop-wrapper', //el.parent(authRoot)
+	authClass: 'login-required'
 };
 
 jFresh.fn.SocketIO.prototype.on = function(cmd, cb) {
@@ -83,7 +105,4 @@ jFresh.fn.SocketIO.prototype.send = function(cmd, data, cb) {
 	this.skt.emit('d', pkt);
 };
 
-jFresh.fn.SocketIO.defaults = {
-	'host': document.location.origin.replace('http://','ws://').replace('https://','wss://'),
-};
 

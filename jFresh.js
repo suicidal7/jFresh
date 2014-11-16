@@ -1,19 +1,25 @@
 /**
  * Module dependencies.
  */
+var settings = require('./config.js')
 
 var express = require('express')
   , app = express()  
-  , server = require('http').createServer(app)
+	, fs = require('fs')
+  , server = require('https').createServer({
+			//~ ca: fs.readFileSync(settings.ca),
+			key: fs.readFileSync(settings.key),
+			cert: fs.readFileSync(settings.cert),
+		}, app)
   , path = require('path')
   , io = require('socket.io').listen(server)
   , spawn = require('child_process').spawn
-	, fs = require('fs')
 	, pty = require('pty.js')
 	, child_process = require('child_process')
 	, sqlite3 = require('sqlite3').verbose()
 	, sessDb = new sqlite3.Database('./sessions.db')
 	, userid = require('userid')
+	, pam = require('authenticate-pam')
 ;
 
 sessDb.serialize(function() {
@@ -186,16 +192,15 @@ function on_user_login(socket,usr,uid) {
 io.sockets.on('connection', function (socket) {
 	//we spawn a new child after socket login with user's crap and start routing from there...
 	var userid, uid;
-	
-		
+	console.log('New Websocket Connection started!');
+	//~ socket.emit('autherror', 'hello world');
 	
 	socket.on("login", function(usr,pwd) {
 		if ( userid ) return;
-		
-		var pam = require('authenticate-pam');
+		console.log('User login', usr);
 		pam.authenticate(usr, pwd, function(err) {
 			if(err) {
-				socket.end();
+				socket.emit('autherror', 'Login Failed');
 			}
 			else {
 				console.log("Authenticated: ", usr);
@@ -206,17 +211,20 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	socket.on("relog", function(uid) {
+		console.log('User resume', uid);
 		if ( !uid.match(/^[a-zA-Z0-9\-]+$/) ) {
 			console.log('Invalid UUID used for relog!', uid);
-			return;
+			socket.close();
 		}
-		sessDb.serialize(function() {
-			sessDb.each("SELECT user FROM sessions WHERE key='"+uid+"'", function(err, row) {
+			sessDb.get("SELECT user FROM sessions WHERE key=?", uid, function(err, row) {
+				if ( !row ) return;
 				console.log("Resuming session for: "+row.user);
 				userid = row.user;
 				on_user_login(socket, row.user, uid);
-  		});
-		});
+  		}).wait(function() {
+				if ( !userid ) socket.emit('autherror', 'Failed to resume session');
+			});
+		
 	});
 	
 
