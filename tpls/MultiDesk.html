@@ -6,15 +6,15 @@
 	flex-wrap: wrap;
 	-align-content: center;
 }
-.multi-desks>.desktop {
+.multi-desks>div {
 	width: 100%;
 	align-self: stretch;
 	display: none;
 }
-.multi-desks>.desktop.active {
+.multi-desks>div.active {
 	display: flex;
 }
-.multi-desks.expose>.desktop {
+.multi-desks.expose>div {
 	width: 50%;
 	display: flex;
 }
@@ -22,38 +22,65 @@
 </style>
 
 <template id="jFresh.MultiDesk">
-	<div class="multi-desks expose">
-		<div class="desktop" tpl="jFresh.Desktop"></div>
-		<div class="desktop active" tpl="jFresh.Desktop"></div>
-		<div class="desktop" tpl="jFresh.Desktop"></div>
-		<div class="desktop" tpl="jFresh.Desktop"></div>
-		<div>
-			<div tpl="jFresh.dummy"></div>
-		</div>
+	<div class="multi-desks expose" fn="MultiDesk">
+		<div fn="Template" Template-id="jFresh.Desktop" class="active"></div>
+		<div fn="Template" Template-id="jFresh.Desktop"></div>
+		<div fn="Template" Template-id="jFresh.Desktop"></div>
+		<div fn="Template" Template-id="jFresh.Desktop"></div>
 	</div>
 </template>
 
 <script type="text/javascript">
 jFresh.fn.MultiDesk = function(root) {
-	if (!root) {
-		console.log('Error: Desktop called without root', arguments);
-		return;
-	}
-$desk = this;
-	var tpl = document.getElementById('jFresh.MultiDesk');
-	var dolly = tpl.content.cloneNode(true);
-	this.el = dolly.children[0];
-	this.el.multiDesk = this;
-	root.appendChild(this.el);
-console.log('root/multid', root, this.el);
+	var me = this;
+	this.el = root;
+	
+	document.addEventListener('keypress', function(ev) {
+		console.log(ev.key, ev.keyCode, ev.shiftKey, ev);
+		if ( ev.shiftKey && ev.keyCode==32 ) {
+			me.el.classList[ me.el.classList.contains('expose') ? 'remove' : 'add' ]( 'expose' );
+		}
+		//~ if ( ev.shiftKey && (ev.keyCode>48 && ev.keyCode<53) ) {
+			//~ var deskIdx = ev.keyCode - 49;
+		  //~ var curr = me.el.querySelector('.active');
+			//~ if ( curr ) curr.classList.remove('active');
+			//~ me.el.children[deskIdx].classList.add('active');
+		//~ }
+	});
+	
+	document.addEventListener('click', function(ev) {
+		if (!ev.ctrlKey || !me.el.classList.contains('expose') ) return;
+		for(var i=0; i<me.el.children.length; i++) {
+			if ( me.el.children[i].contains(ev.target) ) {
+				me.el.children[i].classList.add('active');
+			}
+			else {
+				me.el.children[i].classList.remove('active');
+			}
+		}
+		me.el.classList.remove('expose');
+	});
+	
+	
+	//~ if (!root) {
+		//~ console.log('Error: Desktop called without root', arguments);
+		//~ return;
+	//~ }
+//~ $desk = this;
+	//~ var tpl = document.getElementById('jFresh.MultiDesk');
+	//~ var dolly = tpl.content.cloneNode(true);
+	//~ this.el = dolly.children[0];
+	//~ this.el.multiDesk = this;
+	//~ root.appendChild(this.el);
+//~ console.log('root/multid', root, this.el);
 
-	var desks = this.el.querySelectorAll('.desktop');
-	this.desks = [];
-	for(var i=0; i<desks.length; i++) {
-		this.desks.push( new jFresh.fn.Desktop(desks[i]) );
-	}
+	//~ var desks = this.el.querySelectorAll('.desktop');
+	//~ this.desks = [];
+	//~ for(var i=0; i<desks.length; i++) {
+		//~ this.desks.push( new jFresh.fn.Desktop(desks[i]) );
+	//~ }
 	
 	
-	return this.el;
+	//~ return this.el;
 };
 </script>
