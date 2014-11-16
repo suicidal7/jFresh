@@ -1,0 +1,287 @@
+<style>
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Regular'), local('Roboto-Regular'), url('../fonts/Y5yuUJGDLtmYv2_3fMB4fA.woff') format('woff');
+}
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  src: local('Roboto Medium'), local('Roboto-Medium'), url('../fonts/oHi30kwQWvpCWqAhzHcCSD8E0i7KZn-EPnyo3HZu7kw.woff') format('woff');
+}
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Bold'), local('Roboto-Bold'), url('../fonts/isZ-wbCXNKAbnjo6_TwHTj8E0i7KZn-EPnyo3HZu7kw.woff') format('woff');
+}
+
+html {
+	padding: 0;
+	margin: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	background-color: 10px;
+}
+body {
+	padding: 0;
+	margin: 0;
+	flex: 1 1 auto;
+	self-align: stretch;
+	background-color: transparent;
+	overflow: hidden;
+	
+	font-family: 'Roboto';
+	color: #FFFFFF;
+	
+	display: flex;
+}
+
+
+.desktop-wrapper {
+	flex: 1 1 auto;
+	align-self: stretch;
+	display: flex;
+	flex-flow: column nowrap;
+	
+	font-family: 'Roboto';
+	color: #FFFFFF;
+	-background: url('imgs/bg3.jpg') no-repeat fixed center center / cover transparent;
+	background: url('imgs/bg3.jpg') top left no-repeat;
+	background-size: 100% 100%;
+
+}
+.desktop-wrapper>.workspace {
+	flex: 1 1 auto;
+	align-self: stretch;
+	position: relative;
+}
+.desktop-wrapper>.taskbar {
+	background-color: rgba(164, 241, 136, 0.4);
+	border-top: 1px solid #A4F188;
+	order: 2;
+	flex: 0 1 auto;
+	align-self: auto;
+	min-width: 100%;
+	height: 50px;
+	display: flex;
+	flex-flow: column nwrap;
+	position: relative;
+	
+	justify-content: flex-start;
+	align-items: flex-start;
+
+}
+
+.icon {
+	display: inline-block;
+	width: 32px;
+	height: 32px;
+	background: url('imgs/Betelgeuse/48x48/places/folder-development.png') no-repeat  left top transparent;
+	background-size: 100% 100%;
+}
+
+.icon.i48 {
+	width: 48px;
+	height: 48px;
+}
+
+.icon.i24 {
+	width: 24px;
+	height: 24px;
+}
+
+.icon.apps-list {
+	background-image: url('imgs/Betelgeuse/48x48/places/start-here-chakra.png');
+}
+
+.icon-sheen {
+width:100%;
+height:100%;
+background-color: rgba(255,255,255,0.2);
+display: none;
+}
+
+.icon:hover .icon-sheen {
+	display: block;
+}
+
+.icon.app-icon-Terminal {
+	background-image: url('imgs/Betelgeuse/48x48/apps/utilities-terminal.png');
+}
+
+.icon.app-icon-xEditor {
+	background-image: url('imgs/Betelgeuse/48x48/apps/accessories-text-editor.png');
+}
+
+.icon.red-rabbit {
+	background-image: url('imgs/Betelgeuse/48x48/misc/red-rabbit-icon.png');
+}
+
+.taskbar>.icon.apps-list {
+	align-self: flex-start;
+	flex: 0 0 auto;
+}
+
+.taskbar>.WindowsList {
+	flex: 1 1 auto;
+	align-self: stretch;
+}
+
+.taskbar>.icon.red-rabbit {
+	flex: 0 0 auto;
+	align-self: flex-end;
+  animation: tada 3s both infinite;
+  -webkit-animation: tada 3s both infinite;
+	position: fixed;
+	top: 0;
+	right: 0;
+}
+
+.AppsList-wrapper {
+	padding-bottom: 5px;
+}
+
+[WindowsList-itemTpl] > li.active {
+	background-color: #A4F188;
+}
+
+.desktop-login-wrapper {
+	position: fixed;
+	z-index: 9998;
+	background-color: rgba(0,0,0,0.5);
+	top: 0; left: 0; right: 0; bottom: 0;
+	display: flex;
+	display: none;
+	justify-content: center;
+	align-items: center;
+	align-content: center;
+}
+
+.desktop-login-wrapper label>input {
+	width: 110px;
+	margin-bottom: 5px;
+}
+
+.desktop-login-wrapper label>span {
+	display: inline-block;
+	width: 85px;
+}
+
+.desktop-login-wrapper h1 {
+	margin-bottom: 10px;
+	border-bottom: 1px dashed #000;
+	width: 100%;
+}
+
+.desktop-login-wrapper input[type=submit] {
+	float: right;
+}
+
+.desktop-login-wrapper .xLogin {
+	padding: 10px;
+	align: auto;
+	background-color: white;
+	border-radius: 5px;
+	-box-shadow: 0 0 12px 1px rgba(0, 0, 0, 0.6);
+	box-shadow: 0 0 12px 1px rgba(164, 241, 136, 0.4);
+	color: #000;
+	-border: 5px solid #A4F188 rgba(164, 241, 136, 0.4);
+}
+
+</style>
+
+<template id="jFresh.Icon">
+	<div class="icon-sheen"></div>
+</template>
+
+<template id="jFresh.Desktop">
+	<div class="desktop-wrapper" fn-disabled="MakeItRain">
+		<div class="workspace" fn="WindowManager AppLauncher">
+		</div>
+		<div class="taskbar" fn="Taskbar" Taskbar-manager="">
+			<div fn="IconButton" class="i48 apps-list"></div>
+			<div class="AppsList-wrapper" fn="Popup" Template-id="jFresh.AppsList" Popup-handle=".taskbar>.apps-list" Popup-location="bottom left,top left">
+				<ul fn="AppsList" class="AppsList" AppsList-itemTpl="jFresh.AppsList.item" AppsList-launcher=".desktop-wrapper>.workspace">
+				<template id="jFresh.AppsList.item">
+					<li class="i48" fn="AppsListItem IconButton"></li>
+				</template>
+				</ul>
+			</div>
+			<ul class="WindowsList" fn="WindowsList" WindowsList-manager=".desktop-wrapper>.workspace" WindowsList-itemTpl="jFresh.WindowsList.item">
+				<template id="jFresh.WindowsList.item">
+					<li class="i48" fn="WindowsListItem IconButton"></li>
+				</template>
+			</ul>
+			
+			<div fn="IconButton" class="i48 red-rabbit" onclick="var e = document.querySelector('.desktop-wrapper'); if (!e.makeItRain) e.makeItRain = new jFresh.fn.MakeItRain(e); this.hide();"></div>
+		</div>
+		
+		<div class="desktop-login-wrapper" fn="xLogin">
+			<form action="#">
+			<fieldset class="xLogin"><h1>Identify Yourself!</h1>
+				<label><span>Username:</span><input type="text" name="username"></label><br>
+				<label><span>Password:</span><input type="text" name="username"></label><br>
+				<input type="submit" value="Try!">
+			</fieldset>
+			</form>
+		</di>
+	</div>
+</template>
+
+
+<script type="text/javascript">
+
+jFresh.fn.xAuth = function(el, opts) {
+	this.el = el;
+	this.opts = opts;
+	
+};
+
+jFresh.fn.xLogin = function(el, opts) {
+	this.el = el;
+	this.opts = opts;
+	
+	var frm = this.el.getElementsByTagName('form')[0];
+	frm.onsubmit = function() {
+		alert('ok');
+		return false;
+	};
+	
+	if ( localStorage.user ) { //try to relog from session key
+		this.el.hide();
+	}
+	else { //new session, need userinfo...
+		
+	}
+
+};
+
+jFresh.fn.xLogin.prototype.show = function() {
+	this.el.show();
+};
+
+
+jFresh.fn.xLogin.appInfo = {
+	title: 'xLogin',
+};
+
+jFresh.fn.xLogin.defaults = {
+};
+
+
+
+jFresh.fn.IconButton = function(el, opts) {
+	this.el = el;
+	this.opts = opts;
+	jFresh.fn.Template.energize('jFresh.Icon', el);
+	this.el.classList.add('icon');
+	this.el.classList.add('icon-button');
+};
+
+
+
+</script>

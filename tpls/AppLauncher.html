@@ -1,0 +1,39 @@
+<script type="text/javascript">
+
+jFresh.fn.AppLauncher = function(el, opts) {
+	this.opts  = opts;
+	this.el = el;
+	this.wm = this.opts.manager ? this.el.closest(this.opts.manager) : this.el;
+	if ( this.wm ) this.wm = this.wm.windowManager;
+	
+	
+	//~ var me = this;
+	//~ setTimeout(function() {
+		//~ me.launch('jFresh.xLogin');
+	//~ }, 500);
+	return this;
+};
+
+jFresh.fn.AppLauncher.uids = 1;
+
+jFresh.fn.AppLauncher.defaults = {
+	manager: null, //defaults to this.el, otherwise this.el.closest(manager)
+	appClass: 'app-icon-', //what to prepend to class added to item based on app name
+};
+
+jFresh.fn.AppLauncher.prototype.launch = function(appId) {
+	//appId is basically a templateId
+	var win = this.wm.createWindow();
+//~ console.log('window', win, win.window);
+	var title = appId.substr('jFresh.'.length);
+	win.window.__app = {
+		id: appId,
+		title: jFresh.fn[title].appInfo.title,
+		uid: 'app-'+(jFresh.fn.AppLauncher.uids++),
+	};
+	win.window.icon = this.opts.appClass+title;
+	win.window.title = win.window.__app.title;
+	win.window.content = appId; //content expects it
+};
+
+</script>

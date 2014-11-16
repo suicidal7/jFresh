@@ -1,0 +1,121 @@
+<style>
+.terminal-wrapper {
+	display: flex;
+	flex: 1 1 auto;
+	align-self: stretch;
+	min-width: 200px;
+	min-height: 100px;
+}
+.terminal-wrapper>.terminal {
+	flex: 1 1 auto;
+	align-self: stretch;
+	white-space: nowrap;
+	background-color: rgba(0,0,0,0.65) !important;
+	-border: 5px solid rgba(164, 241, 136, 0.4) !important;
+	-border: 5px solid rgba(0, 0, 0, 0.2) !important;
+	border: 0 !important;
+	padding: 5px;
+}
+.terminal-wrapper>.terminal>* {
+	white-space: nowrap;
+}
+</style>
+
+<template id="jFresh.Terminal">
+	<div class="terminal-wrapper" fn="SocketIO Terminal"  Terminal-skt="socketIO">
+	</div>
+</template>
+
+
+<script type="text/javascript" src="js/ext/term.js"></script>
+<script type="text/javascript">
+
+TERM_COUNT=1;
+
+jFresh.fn.Terminal = function(el, opts) {
+	var me = this;
+	this.opts = opts;
+	this.skt = el[ this.opts.skt ]; //in case we want to use something else than PhpWebSocket
+	//~ this.skt = new io.connect(this.opts.host+'/pty'+(TERM_COUNT++));
+	//~ this.skt = io.connect(this.opts.host, {'force new connection': true});
+	var skt= this.skt;
+	this.el = el;
+
+	this.term = new Terminal({
+				cols: 80,
+				rows: 24,
+				useStyle: true,
+				screenKeys: true,
+				cursorBlink: true,
+				termName: 'xterm-color'
+			});
+	
+	this.term.on('data', function(data) {
+		//~ if ( skt.is_open ) skt.send(data);
+		skt.send('term', data);
+	});
+	
+	skt.on('term', function(msg) {
+			me.term.write(msg);
+	});
+	
+	skt.send('term');
+	
+	/*
+	skt.listen(function(type, nfo) {
+		//~ console.log('el.phpWebSocket', type, nfo);
+		if (type=='onopen') {
+			skt.exec('shell');
+		}
+		else if (type=='msg' && nfo.uid>0) {
+			if (nfo.shell) { //we just opened a shell! lets hijack onmessage so that we deal with raw data
+				me.term.write('WEEEE!\x1b[m\r\n');
+				skt.onmessage=function(msg) {
+//~ console.log('RAW', msg);
+					me.term.write(msg.data);
+				}
+				
+				//~ skt.send("PS1='\\[\\e[0;32m\\]\\u\\[\\e[m\\] \\[\\e[1;34m\\]\\w\\[\\e[m\\] \\[\\e[1;32m\\]\\$\\[\\e[m\\] \\[\\e[1;37m\\]'\n");
+			}
+		}
+	});*/
+	
+	this.term.open(el);
+	this.term.write('\x1b[31mConnecting...\x1b[m\r\n');
+	
+	this.term.on('title', function(title) {
+		//~ console.log('TERM TITLE', title);
+		me.el.dispatchEvent(new CustomEvent('App.title', {detail: title + ' - '+jFresh.fn.Terminal.appInfo.title}) );
+	});
+	
+	
+	//resizeTerm
+	var w = 7; //term.element.clientWidth/80;
+	var h = 11; //term.element.clientHeight/24;
+	var resizeTerm = function() {
+		var rows = Math.floor(me.el.clientHeight/h)-1;
+		var cols = Math.floor(me.el.clientWidth/w);
+//~ console.log('TERM SIZE', cols, rows);
+		skt.send("term-resize", {cols: cols, rows: rows});
+		me.term.resize(cols, rows);
+		me.term.focus();
+	};
+	resizeTerm();
+//~ console.log('term el', me.el);
+	window.addResizeListener(me.el, resizeTerm);
+	//~ me.el.addEventListener('resize', resizeTerm);
+
+	
+	return el;
+};
+
+jFresh.fn.Terminal.appInfo = {
+	title: 'xTerm',
+};
+
+jFresh.fn.Terminal.defaults = {
+	skt: 'phpWebSocket',
+	host: document.location.origin.replace('http://','ws://').replace('https://','wss://'),
+};
+
+</script>

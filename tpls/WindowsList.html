@@ -1,0 +1,79 @@
+<script type="text/javascript">
+
+jFresh.fn.WindowsListItem = function(el, opts) {
+	
+};
+
+jFresh.fn.WindowsListItem.defaults = {};
+
+jFresh.fn.WindowsListItem.prototype = {
+	set icon(i) { 
+		if ( this.__lastIcon ) this.el.classList.remove( this.__lastIcon );
+		this.__lastIcon = i;
+		this.el.classList.add(this.__lastIcon);
+	},
+}
+
+jFresh.fn.WindowsList = function(el, opts) {
+	var me = this;
+	this.opts  = opts;
+	this.el = el;
+	this.wm = this.opts.manager ? this.el.closest(this.opts.manager) : this.el;
+	if ( this.wm ) this.wm = this.wm.windowManager;
+	
+	this.el.addEventListener('click', function(ev) {
+		var t = ev.target.parent('[uid]');
+//~ console.log('cluck', t , t.hasAttribute('uid'), t.attachedWindow );
+		if ( t && t.hasAttribute('uid') && t.attachedWindow ) {
+			if ( t.classList.contains('active') ) t.attachedWindow.minimize();
+			else me.wm.activateWindow(t.attachedWindow.el);
+		}
+	});
+	
+	this.wm.el.addEventListener('jFresh.Window', function(ev) {
+		//ev.target = window DOM element, ev.detail = action
+		//~ console.log(ev.detail._uid, ev.detail.opts);
+		var what = ev.detail;
+		var obj = ev.target.window;
+		if ( !obj ) return; //early window initialization
+		
+//~ console.log('jFresh.window', ev, ev.target, ev.target.window);
+		//try to find it, if not found, we add it
+		var li = me.el.querySelector('[uid='+obj._uid+']');
+		if (!li && what!='close') {
+			li = jFresh.fn.Template.energize( me.opts.itemTpl, me.el );
+			li.setAttribute('uid', obj._uid);
+			li.attachedWindow = obj;
+			obj.minimizeTo = li;
+		}
+		if ( what=='close' ) {
+			if (li) li.remove();
+		}
+		else if ( li ) {
+			if ( what == 'icon' ) {
+				li.windowsListItem.icon = obj.opts.icon;
+			}
+			else if ( what == 'minimized' ) {
+				li.classList.remove('active');
+			}
+			else if ( what == 'activated' ) {
+				var active = me.el.querySelector('.active');
+				if ( active && active!=li ) active.classList.remove('active');
+				li.classList.add('active');
+			}
+		}
+	}, true);
+	
+	return this;
+};
+
+jFresh.fn.WindowsList.defaults = {
+	manager: null, //defaults to this.el, otherwise this.el.closest(manager)
+	itemTpl: 'jFresh.WindowsList.item',
+};
+
+jFresh.fn.WindowsList.prototype = {
+};
+
+
+</script>

@@ -1,0 +1,70 @@
+
+<style>
+
+.AppsList {
+	min-width: 200px;
+	min-height: 100px;
+	border: 1px solid #A4F188;
+	background-color: rgba(164, 241, 136, 0.4);
+	display: flex;
+	flex-flow: row wrap;
+}
+
+.AppsList>li {
+}
+
+</style>
+
+
+
+<script type="text/javascript">
+
+jFresh.fn.AppsListItem = function(el, opts) {
+	this.el = el;
+	this.opts = opts;
+};
+
+jFresh.fn.AppsListItem.defaults = {
+	appClass: 'app-icon-', //what to prepend to class added to item based on app name
+	appTitle: '', //element to fill with app title el.innerHTML=title
+};
+
+jFresh.fn.AppsListItem.prototype.setApp = function(app) {
+	this.el.classList.add(this.opts.appClass+app);
+	if (this.opts.appTitle) {
+		var e = this.el.closest(this.opts.appTitle);
+		if (e) e.innerHTML = app;
+	}
+};
+
+jFresh.fn.AppsList = function(el, opts) {
+	var me = this;
+	this.el = el;
+	this.opts = opts;
+	
+	var li;
+	for(var app in jFresh.fn) {
+		if ( !jFresh.fn.hasOwnProperty(app) || !jFresh.fn[app].hasOwnProperty('appInfo') ) continue;
+		li = jFresh.fn.Template.energize( this.opts.itemTpl, this.el );
+		li.setAttribute('app-link', 'jFresh.'+app);
+		li.appsListItem.setApp( app );
+	}
+	
+	this.launcher = this.el.closest(this.opts.launcher).appLauncher;
+	this.el.addEventListener('click', function(ev) {
+		var t = ev.target.getAttribute('app-link') || ev.target.parent('[app-link]').getAttribute('app-link');
+		if ( t ) me.launcher.launch( t );
+	});
+};
+
+jFresh.fn.AppsList.defaults = {
+	itemTpl: 'jFresh.AppsList.item',
+	launcher: '',
+};
+
+jFresh.fn.xEditor = function(el, opts) {
+	
+};
+
+jFresh.fn.xEditor.appInfo = {title: 'xEditor'};
+</script>

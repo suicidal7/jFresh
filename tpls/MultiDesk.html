@@ -1,0 +1,59 @@
+<style>
+.multi-desks {
+	flex: 1 1 auto;
+	align-self: stretch;
+	display: flex;
+	flex-wrap: wrap;
+	-align-content: center;
+}
+.multi-desks>.desktop {
+	width: 100%;
+	align-self: stretch;
+	display: none;
+}
+.multi-desks>.desktop.active {
+	display: flex;
+}
+.multi-desks.expose>.desktop {
+	width: 50%;
+	display: flex;
+}
+
+</style>
+
+<template id="jFresh.MultiDesk">
+	<div class="multi-desks expose">
+		<div class="desktop" tpl="jFresh.Desktop"></div>
+		<div class="desktop active" tpl="jFresh.Desktop"></div>
+		<div class="desktop" tpl="jFresh.Desktop"></div>
+		<div class="desktop" tpl="jFresh.Desktop"></div>
+		<div>
+			<div tpl="jFresh.dummy"></div>
+		</div>
+	</div>
+</template>
+
+<script type="text/javascript">
+jFresh.fn.MultiDesk = function(root) {
+	if (!root) {
+		console.log('Error: Desktop called without root', arguments);
+		return;
+	}
+$desk = this;
+	var tpl = document.getElementById('jFresh.MultiDesk');
+	var dolly = tpl.content.cloneNode(true);
+	this.el = dolly.children[0];
+	this.el.multiDesk = this;
+	root.appendChild(this.el);
+console.log('root/multid', root, this.el);
+
+	var desks = this.el.querySelectorAll('.desktop');
+	this.desks = [];
+	for(var i=0; i<desks.length; i++) {
+		this.desks.push( new jFresh.fn.Desktop(desks[i]) );
+	}
+	
+	
+	return this.el;
+};
+</script>

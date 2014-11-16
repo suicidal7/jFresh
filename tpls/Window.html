@@ -1,0 +1,463 @@
+<style>
+.wm-window {
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	background-color: rgba(164, 241, 136, 0.4);
+	box-shadow: 0 0 12px 1px rgba(0, 0, 0, 0.6);
+	opacity: 0.98;
+	resize: none;
+	overflow: hidden;
+	min-width: 100px;
+	min-height: 40px;
+	width: 480px;
+	height: 240px;
+}
+
+
+.wm-window>header {
+	background-color: #888888;
+	padding: 0px 8px;
+	font-size: 14px;
+	font-weight: bold;
+	flex: 0 0 auto;
+	display: flex;
+	min-height: 36px;
+	align-items: center;
+}
+.wm-window>header>h1 {
+	flex: 1 1 auto;
+	align-self: strech;
+	color: #bbb;
+}
+
+.wm-window.active {
+	z-index: 1;
+}
+.wm-window.active>header {
+	background-color: #365D98;
+}
+.wm-window.active>header>h1 {
+	color: #fff;
+}
+
+
+.wm-window>header>ul.wm-window-buttons {
+	flex: 0 0 auto;
+}
+.wm-window>header>ul.wm-window-buttons>li {
+	display: inline-block;
+	cursor: pointer;
+	width: 15px;
+	height: 15px;
+	line-height: 15px;
+	text-align: center;
+	margin-left: 3px;
+	opacity: 0.7;
+}
+.wm-window>header>ul.wm-window-buttons>li:hover {
+	opacity: 1;
+}
+.wm-window>header>ul.wm-window-buttons>li.minimize {
+	background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAKCAYAAABi8KSDAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NzYwRDNDRkMzMDM5MTFFMkI5MUFGMzlFMTgwOEI4ODEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NzYwRDNDRkQzMDM5MTFFMkI5MUFGMzlFMTgwOEI4ODEiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpCQjE5RDA1NzMwMzQxMUUyQjkxQUYzOUUxODA4Qjg4MSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpCQjE5RDA1ODMwMzQxMUUyQjkxQUYzOUUxODA4Qjg4MSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PsZJjdUAAAAlSURBVHjaYvz//z8DsYCJgQQwqhgZsCCx8QU4I7piRkImAwQYAJ10BBYiYyqTAAAAAElFTkSuQmCC') no-repeat scroll 1px 1px transparent;
+}
+.wm-window>header>ul.wm-window-buttons>li.maximize {
+	background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAKCAYAAABi8KSDAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6QkIxOUQwNTUzMDM0MTFFMkI5MUFGMzlFMTgwOEI4ODEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QkIxOUQwNTYzMDM0MTFFMkI5MUFGMzlFMTgwOEI4ODEiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpCQjE5RDA1MzMwMzQxMUUyQjkxQUYzOUUxODA4Qjg4MSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpCQjE5RDA1NDMwMzQxMUUyQjkxQUYzOUUxODA4Qjg4MSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqAiG1YAAAA7SURBVHjaYvz//z8DsYAJSj8E4v948AdkxSSZDALyQMyIBQtgU0ySyQOomAWJ/RCPuo8ggpGUSAEIMACTWxDft/Hl3wAAAABJRU5ErkJggg==') no-repeat scroll 1px 1px transparent;
+}
+.wm-window>header>ul.wm-window-buttons>li.close {
+	background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAKCAYAAABi8KSDAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6QkIxOUQwNTEzMDM0MTFFMkI5MUFGMzlFMTgwOEI4ODEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QkIxOUQwNTIzMDM0MTFFMkI5MUFGMzlFMTgwOEI4ODEiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpCQjE5RDA0RjMwMzQxMUUyQjkxQUYzOUUxODA4Qjg4MSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpCQjE5RDA1MDMwMzQxMUUyQjkxQUYzOUUxODA4Qjg4MSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PpFaWsQAAABxSURBVHjajJDRDcAgCERtJ2AER+oIjuZIHcER3IBCvDYX5KMklwg8lPNQ1fI3TjpfJgl9QX2F32yquuI2CWqCXNH/YFejgUpgexmGeUAjmMH+9AA4aKUN5h174qFkYEs8CMNuaMYdkc/sNySAW/0RYABjHiW8yydeWwAAAABJRU5ErkJggg==') no-repeat scroll 1px 1px transparent;
+}
+.wm-window>content {
+	padding: 0px;
+	overflow: auto;
+	flex: 1 1 auto;
+	align-self: stretch;
+	display: flex;
+	resize: none;
+	position: relative;
+}
+
+
+@-webkit-keyframes wm-window-close {
+  0% {
+    -webkit-transform: scale(1, 1);
+    -moz-transform: scale(1, 1);
+    -ms-transform: scale(1, 1);
+    -o-transform: scale(1, 1);
+    transform: scale(1, 1);
+  }
+  20% {
+    -webkit-transform: scale(1.2, 1.2);
+    -moz-transform: scale(1.2, 1.2);
+    -ms-transform: scale(1.2, 1.2);
+    -o-transform: scale(1.2, 1.2);
+    transform: scale(1.2, 1.2);
+  }
+  100% {
+    -webkit-transform: scale(0, 0);
+    -moz-transform: scale(0, 0);
+    -ms-transform: scale(0, 0);
+    -o-transform: scale(0, 0);
+    transform: scale(0, 0);
+  }
+}
+
+@keyframes wm-window-close {
+  0% {
+    transform: scale(1, 1);
+  }
+  20% {
+    transform: scale(1.2, 1.2);
+  }
+  100% {
+    transform: scale(0, 0);
+  }
+}
+
+
+
+@-webkit-keyframes wm-window-appear {
+  0% {
+    -webkit-transform: scale(0, 0);
+    -moz-transform: scale(0, 0);
+    -ms-transform: scale(0, 0);
+    -o-transform: scale(0, 0);
+    transform: scale(0, 0);
+  }
+  80% {
+    -webkit-transform: scale(1.2, 1.2);
+    -moz-transform: scale(1.2, 1.2);
+    -ms-transform: scale(1.2, 1.2);
+    -o-transform: scale(1.2, 1.2);
+    transform: scale(1.2, 1.2);
+  }
+  100% {
+    -webkit-transform: rotate(1, 1);
+    -moz-transform: rotate(1, 1);
+    -ms-transform: rotate(1, 1);
+    -o-transform: rotate(1, 1);
+    transform: rotate(1, 1);
+  }
+}
+@keyframes wm-window-appear {
+  0% {
+    transform: scale(0, 0);
+  }
+  80% {
+    transform: scale(1.2, 1.2);
+  }
+  100% {
+    transform: rotate(1, 1);
+  }
+}
+
+@-webkit-keyframes hinge { 
+    0% { -webkit-transform: rotate(0); -webkit-transform-origin: top left; -webkit-animation-timing-function: ease-in-out; } 
+    20%, 60% { -webkit-transform: rotate(80deg); -webkit-transform-origin: top left; -webkit-animation-timing-function: ease-in-out; } 
+    40% { -webkit-transform: rotate(60deg); -webkit-transform-origin: top left; -webkit-animation-timing-function: ease-in-out; } 
+    80% { -webkit-transform: rotate(60deg) translateY(0); opacity: 1; -webkit-transform-origin: top left; -webkit-animation-timing-function: ease-in-out; } 
+    100% { -webkit-transform: translateY(700px); opacity: 0; } 
+} 
+@keyframes hinge { 
+    0% { transform: rotate(0); transform-origin: top left; animation-timing-function: ease-in-out; } 
+    20%, 60% { transform: rotate(80deg); transform-origin: top left; animation-timing-function: ease-in-out; } 
+    40% { transform: rotate(60deg); transform-origin: top left; animation-timing-function: ease-in-out; } 
+    80% { transform: rotate(60deg) translateY(0); opacity: 1; transform-origin: top left; animation-timing-function: ease-in-out; } 
+    100% { transform: translateY(700px); opacity: 0; } 
+} 
+
+.wm-window.closing {
+	-webkit-animation: hinge 0.6s both;
+	animation: hinge 0.6s both;
+}
+
+.wm-window.opening {
+  animation: tada 0.6s both;
+  -webkit-animation: tada 0.6s both;
+	
+}
+
+.wm-window.minimizing,
+.wm-window.maximizing {
+  transition: all 0.5s ease-in-out;
+}
+
+.wm-window.minimized {
+  --webkit-transform: translate3d(400px, 500px, 0) scale(0,0);
+	--opacity: 0;
+}
+
+.wm-window.maximized {
+	position: absolute;
+	top: 0 !important;
+	left: 0 !important;
+	right: 0 !important;
+	bottom: 0 !important;
+	width: 100% !important;
+	height: 100% !important;
+}
+
+@-webkit-keyframes tada { 
+    0% {-webkit-transform: scale(1);} 
+    10%, 20% {-webkit-transform: scale(0.9) rotate(-3deg);} 
+    30%, 50%, 70%, 90% {-webkit-transform: scale(1.1) rotate(3deg);} 
+    40%, 60%, 80% {-webkit-transform: scale(1.1) rotate(-3deg);} 
+    100% {-webkit-transform: scale(1) rotate(0);} 
+} 
+@keyframes tada { 
+    0% {transform: scale(1);} 
+    10%, 20% {transform: scale(0.9) rotate(-3deg);} 
+    30%, 50%, 70%, 90% {transform: scale(1.1) rotate(3deg);} 
+    40%, 60%, 80% {transform: scale(1.1) rotate(-3deg);} 
+    100% {transform: scale(1) rotate(0);} 
+} 
+
+.wm-window.maximized .Resizable-handle {
+	display: none;
+}
+
+.wm-window>header>.icon {
+	margin-right: 5px;
+}
+
+</style>
+
+<template id="jFresh.Window">
+<div class="wm-window" fn="Window Resizable">
+	<header>
+		<span class="icon i24"></span>
+		<h1></h1>
+		<ul class="wm-window-buttons">
+			<li class="minimize"></li>
+			<li class="maximize"></li>
+			<li class="close"></li>
+		</ul>
+	</header>
+	<content>
+	
+	
+	</content>
+</div>
+</template>
+
+<script type="text/javascript">
+jFresh.fn.Window = function(el, opts) {
+	this.opts = opts;
+	this.el = el;
+	this._uid = 'win-'+jFresh.fn.Window.uids++;
+	var me = this;
+	
+	/*this.opts = jFresh.extend(true,{
+		minimize: 1,
+		maximize: 1,
+		close: 1,
+		rect: {
+			top: 0,
+			left: 0,
+			width: '480px',
+			height: '240px'
+		},
+		title: 'New Window',
+		content: 'Hello World!',
+	}, args);*/
+
+	//~ this.manager = manager;
+	//~ this._create();
+	
+	el.moveable({handle: this.opts.headerEl, container: this.el.parentNode});
+	this.contentEl = this.el.closest( this.opts.contentEl );
+	this.title = this.opts.title;
+	this.content = this.opts.content;
+	
+	
+	//TODO: make this one listener!?
+	el.closest(this.opts.minimizeEl).addEventListener('click', function() {
+		me.minimize();
+	});
+	el.closest(this.opts.maximizeEl).addEventListener('click', function() {
+		me.maximize();
+	});
+	el.closest(this.opts.closeEl).addEventListener('click', function() {
+		me.close();
+	});
+	
+	//set active
+	el.style.left='40px';
+	el.style.top='40px';
+	el.animateClass('opening');
+	
+}
+
+jFresh.fn.Window.uids = 1;
+
+jFresh.fn.Window.defaults = {
+	title: 'New Window',
+	content: '<h2>Jello World?! O.o</h2>',
+	icon: '',
+	iconEl: 'header>.icon',
+	titleEl: 'header>h1',
+	minimizeEl: '.minimize',
+	maximizeEl: '.maximize',
+	closeEl: '.close',
+	headerEl: 'header',
+	contentEl: 'content',
+	minimizeTo: 'bottom-center', //or element
+};
+
+jFresh.fn.Window.prototype = {
+	set content(c) { 
+	//~ console.log('Window.setContent', content);
+		this.contentEl.innerHTML = '';
+		if ( typeof(c)=='string' ) { //consider it a template?
+			if (!jFresh.fn.Template.energize(c, this.contentEl)) {
+				this.contentEl.innerHTML = c;
+			}
+		}
+		else
+			this.contentEl.appendChild(c);
+	},
+	set title(t) { 
+		this.opts.title = t;
+		//TODO: fix me to be something else than innerHTML
+		this.el.closest( this.opts.titleEl ).innerHTML = t;
+		
+		this.el.dispatchEvent(new CustomEvent('jFresh.Window', {detail: 'title'}) );
+	},
+	get title() { 
+		return this.opts.title; 
+	},
+	get icon() { 
+		return this.opts.icon; 
+	},
+	set icon(i) { 
+		this.opts.icon = i; 
+		var e = this.el.closest(this.opts.iconEl); 
+		if (e) e.classList.add(i);
+		this.el.dispatchEvent(new CustomEvent('jFresh.Window', {detail: 'icon'}) );
+	},
+	get minimizeTo() {
+		return this.opts.minimizeTo;
+	},
+	set minimizeTo(el) {
+		this.opts.minimizeTo = el;
+	},
+};
+
+
+jFresh.fn.Window.prototype._create = function() {
+
+	//~ if ( typeof this.opts.content == 'string' ) {
+		//~ win.querySelector('content').appendHtml( this.opts.content );
+	//~ }
+	//~ else {
+		//~ win.querySelector('content').appendChild( this.opts.content );
+	//~ }
+	
+//	this.activateWindow(win);
+	
+	win.animateClass('opening');
+	//~ win.animateClass('tada');
+	
+	win.style.left=0;
+	win.style.top=0;
+	
+	if ( this.opts.pos === 'auto' ) {
+		var style = window.getComputedStyle(this.el.parentNode);
+		if ( this.lastCoords > parseInt(style.height)-100 || this.lastCoords > parseInt(style.width)-100 ) this.lastCoords = 0;
+		win.style.left = this.lastCoords+'px';
+		win.style.top = this.lastCoords+'px';
+		this.lastCoords += 30;
+	}
+	
+	return win;
+};
+
+jFresh.fn.Window.prototype.minimize = function(args) {
+	var opts = jFresh.extend(true,{
+		'towards': this.opts.minimizeTo, //of workspace - or give DOM element
+		}, args);
+//~ console.log('going towards', opts.towards);
+	var win = this.el;
+	//~ win.classList.remove('minimized');
+	win.animateClass('minimizing', 'minimized');
+	
+	var cssXform = {
+		//~ transform: '',
+		opacity: 0,
+	};
+	
+	if ( win.__minimizeWindow ) { //unminimize
+		for(var k in win.__minimizeWindow) {
+			if ( !win.__minimizeWindow.hasOwnProperty(k) ) continue;
+			win.style[k] = win.__minimizeWindow[k]
+		}
+		delete win.__minimizeWindow;
+		win.dispatchEvent(new CustomEvent('jFresh.Window', {detail: 'restored'}) );
+	}
+	else {
+		var x,y;
+		if ( opts.towards ) {
+			var mStyle, wStyle = this.el.getBoundingClientRect();
+		 	if ( opts.towards === 'bottom-center' ) {
+				mStyle = this.el.parentNode.getBoundingClientRect();
+			}
+			else if ( opts.towards instanceof Node ) {
+				mStyle = opts.towards.getBoundingClientRect();
+			}
+			x = (mStyle.width/2 + mStyle.left ) - ( wStyle.width/2 + wStyle.left);
+			y = (mStyle.height + mStyle.top) - ( wStyle.height/2 + wStyle.top );
+			cssXform.transform = 'translate3d('+x+'px,'+y+'px,0) scale(0,0)';
+		}
+
+		win.__minimizeWindow = {
+		};
+		for(var k in cssXform) {
+			if ( !cssXform.hasOwnProperty(k) ) continue;
+			win.__minimizeWindow[k] = win.style[k];
+			win.style[k] = cssXform[k];
+		}
+		win.classList.add('minimized');
+		win.__minimizeWindow['transform']='';
+		win.dispatchEvent(new CustomEvent('jFresh.Window', {detail: 'minimized'}) );
+	}
+	
+};
+
+jFresh.fn.Window.prototype.maximize = function(win) {
+	var win = this.el;
+	
+	win.animateClass('maximizing');
+	
+	if ( win.__maximizeWindow ) {
+		win.classList.remove('maximized');
+		win.style.left = win.__maximizeWindow.left;
+		win.style.top = win.__maximizeWindow.top;
+		delete win.__maximizeWindow;
+		win.dispatchEvent(new CustomEvent('jFresh.Window', {detail: 'restored'}) );
+	}
+	else {
+		win.__maximizeWindow = {left: win.style.left, top: win.style.top };
+		win.style.left = 0;
+		win.style.top = 0;
+		win.classList.add('maximized');
+		win.dispatchEvent(new CustomEvent('jFresh.Window', {detail: 'maximized'}) );
+	}
+};
+
+jFresh.fn.Window.prototype.restore = function() {
+	var win = this.el;
+	if ( win.__minimizeWindow ) this.minimize();
+	else if ( win.__maximizeWindow ) this.maximize();
+};
+
+jFresh.fn.Window.prototype.close = function() {
+	var win = this.el;
+	win.dispatchEvent(new CustomEvent('jFresh.Window', {detail: 'close'}) );
+	
+	win.animateClass('closing', function() {
+		win.remove();
+	});
+};
+
+
+</script>
