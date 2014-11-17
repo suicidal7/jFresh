@@ -30,7 +30,7 @@ process.on('message', function(m, skt) {
 		break;
 	case 'die':
 		console.log('Child died...');
-		term.destroy();
+		if (term) term.destroy();
 		process.exit(0);
 		break;
 	}
