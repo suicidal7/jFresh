@@ -2,9 +2,8 @@
  * Module dependencies.
  */
 var settings = require('./config.js')
-
-var express = require('express')
-  , app = express()  
+	, express = require('express')
+	, app = express()  
 	, fs = require('fs')
   , server = require('https').createServer({
 			//~ ca: fs.readFileSync(settings.ca),
@@ -20,6 +19,7 @@ var express = require('express')
 	, sessDb = new sqlite3.Database('./sessions.db')
 	, userid = require('userid')
 	, pam = require('authenticate-pam')
+	, cutomSender = require('express/node_modules/send/lib/send')
 ;
 
 sessDb.serialize(function() {
@@ -39,6 +39,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
+
+//~ console.log(Object.keys(app.configure)); process.exit(0);
 
 //Routes
 app.get('/term.js', function (req, res) {
@@ -68,6 +70,73 @@ app.get('/jFresh.js', function (req, res) {
 
 	
 	res.end();
+});
+
+app.get('/file/*', function (req, res) {
+	
+	var sendfile = function(path, options, fn){
+		var self = this
+			, req = self.req
+			, next = this.req.next
+			, options = options || {}
+			, done;
+
+		// support function as second arg
+		if ('function' == typeof options) {
+			fn = options;
+			options = {};
+		}
+
+		// socket errors
+		req.socket.on('error', error);
+
+		// errors
+		function error(err) {
+			if (done) return;
+			done = true;
+
+			// clean up
+			cleanup();
+			if (!self.headerSent) self.removeHeader('Content-Disposition');
+
+			// callback available
+			if (fn) return fn(err);
+
+			// list in limbo if there's no callback
+			if (self.headerSent) return;
+
+			// delegate
+			next(err);
+		}
+
+		// streaming
+		function stream() {
+			if (done) return;
+			cleanup();
+			if (fn) self.on('finish', fn);
+		}
+
+		// cleanup
+		function cleanup() {
+			req.socket.removeListener('error', error);
+		}
+
+		// transfer
+		var file = cutomSender(req, path);
+		if (options.root) file.root(options.root);
+		file.hidden(true);
+		file.maxage(options.maxAge || 0);
+		file.on('error', error);
+		file.on('directory', next);
+		file.on('stream', stream);
+		file.pipe(this);
+		this.on('finish', cleanup);
+	};
+	
+	var realPath = path.resolve( req.url.substr('/file'.length) );
+	//TODO: check user has access to file!
+	console.log('Serving', realPath);
+	sendfile.call(res, realPath);
 });
 
 app.get('/', function (req, res) {
