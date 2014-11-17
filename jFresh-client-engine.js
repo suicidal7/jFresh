@@ -81,6 +81,7 @@ extend: function() {
 							el[ lowerName ] = new jFresh.fn[ oName ]( el, opts );
 							el[ lowerName ].el = el;
 							el[ lowerName ].otps = opts;
+							el.classList.add(oName);
 						}
 						else {
 							console.log('WARNING Element Already Energized with: ', oName, el);
