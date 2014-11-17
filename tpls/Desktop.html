@@ -38,6 +38,7 @@ body {
 	color: #FFFFFF;
 	
 	display: flex;
+	font-size: 12px;
 }
 
 
@@ -158,6 +159,10 @@ body {
 	height: 24px;
 }
 
+.icon.pen {
+	background-image: url('imgs/fatcow/32x32/pencil.png');
+}
+
 .icon.apps-list {
 	background-image: url('imgs/Betelgeuse/48x48/places/start-here-chakra.png');
 }
@@ -261,6 +266,28 @@ display: none;
 	box-shadow: 0 0 12px 1px rgba(164, 241, 136, 0.4);
 	color: #000;
 	-border: 5px solid #A4F188 rgba(164, 241, 136, 0.4);
+}
+
+
+tr:nth-child(2n) {
+			background-color: #F7F7F7';
+}
+.selected {
+			border-bottom: 1px solid #EBEAA7 !important;
+			box-shadow: 0px -1px #EBEAA7 !important;
+			padding-top: 0px;
+			background: none repeat scroll 0% 0% #FFFEB7 !important;
+			color: #2B2B2B !important;
+}
+	
+nav .selected {
+			background: none repeat scroll 0% 0% #27AE60 !important;
+			color: #FFFFFF !important;
+			border-color: #27AE60 !important;
+}
+
+.AppsList-wrapper {
+	z-index: 2;
 }
 
 </style>

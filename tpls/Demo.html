@@ -1,0 +1,24 @@
+<style>
+.Demo {
+	flex: 1 1 auto;
+	align-self: stretch;
+	display: flex;
+}
+</style>
+
+<template id="jFresh.Demo">
+	<div fn="Template Demo" Template-id="jFresh.FileExplorer"></div>
+</template>
+
+<script type="text/javascript">
+jFresh.fn.Demo = function(el,args) {
+console.log('demo el', el);
+	el.addEventListener('change', function(ev) {
+		console.log('something changed', ev.target);
+	}, true);
+}
+
+jFresh.fn.Demo.appInfo = {
+	title: 'DemoEL'
+};
+</script>

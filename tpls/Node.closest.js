@@ -1,7 +1,7 @@
 Node.prototype.closest = function(sel) {
 	var p = this;
-	while(!p.querySelector(sel) && p.parentNode) p = p.parentNode;
-	return p.querySelector(sel);
+	while(!p.matches(sel) && !p.querySelector(sel) && p.parentNode) p = p.parentNode;
+	return p.matches(sel) ? p : p.querySelector(sel);
 };
 
 Node.prototype.parent = function(sel) {
@@ -20,6 +20,48 @@ Node.prototype.show = function() {
 	this.style.display = this.__display__ || 'block';
 };
 
+Node.prototype.toggle = function() {
+	this[this.__display__ ? 'show' : 'hide']();
+};
+
+Node.prototype.toggleClass = function(cls) {
+	this.classList[ this.classList.contains(cls) ? 'remove' : 'add' ](cls);
+	return this;
+};
+
+//~ Node.prototype.slideHide = function() {
+	//~ this.style.transition = 'height 0.5s ease-in-out';
+	//~ var me = this;
+	//~ setTimeout(function() {
+		//~ var style = window.getComputedStyle(me);
+		//~ me.__height__ = style.height;
+		//~ me.__overflow__ = style.overflow;
+		//~ me.style.height = '0px';
+		//~ me.style.overflow = 'hidden';
+	//~ }, 1);
+//~ };
+
+//~ Node.prototype.slideShow = function() {
+	//~ if ( !this.__height__ ) return;
+	
+	//~ this.style.height = this.__height__;
+	//~ var onEnd = function() {
+		//~ this.style.overflow = this.__overflow__;
+		//~ delete this.__height__;
+		//~ delete this.__overflow__;
+		//~ this.removeEventListener('webkitTransitionEnd', onEnd);
+//~ console.log('on end');
+	//~ };
+	//~ this.addEventListener('webkitTransitionEnd', onEnd);
+//~ };
+
+
+//~ Node.prototype.slideToggle = function() {
+	//~ this[this.__height__ ? 'slideShow' : 'slideHide']();
+//~ };
+
+
+
 Node.prototype.tether = function(cb) {
 console.log('tethering to ', this);
 	if ( !this.hasOwnProperty('__TETHERED__') ) {
@@ -28,6 +70,21 @@ console.log('tethering to ', this);
 	}
 	
 	this.__TETHERED__.push(cb);
+};
+
+
+Node.prototype.fireEvent = function(event){
+	if (document.createEventObject){
+		// dispatch for IE
+		var evt = document.createEventObject();
+		return this.fireEvent('on'+event,evt)
+	}
+	else{
+		// dispatch for firefox + others
+		var evt = document.createEvent("HTMLEvents");
+		evt.initEvent(event, true, true ); // event type,bubbling,cancelable
+		return !this.dispatchEvent(evt);
+	}
 };
 
 
