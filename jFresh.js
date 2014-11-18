@@ -28,7 +28,7 @@ sessDb.serialize(function() {
 
 
 // all environments
-app.set('port', process.env.TEST_PORT || 443);
+app.set('port', process.env.TEST_PORT || settings.port || 443);
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
