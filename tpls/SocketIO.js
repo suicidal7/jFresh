@@ -10,9 +10,8 @@ jFresh.fn.SocketIO = function( el, opts ) {
 	
 	this.is_open = false;
 	
-	el.tether(function() {
-		me.skt.disconnect();
-	});
+	el.tether(function() { me.skt.disconnect(); });
+	jFresh.onBeforeUnload(function() { me.skt.disconnect(); });
 	
 	
 	var serveCallbacks = function( key, data ) {
@@ -40,7 +39,8 @@ jFresh.fn.SocketIO = function( el, opts ) {
 		me.is_open = true;
 		me.el.parent(me.opts.authRoot).classList.remove( me.opts.authClass );
 		serveCallbacks('sessionKey', nfo);
-		
+		me.el.dispatchEvent(new CustomEvent('SocketIO.ready') );
+console.log('dispatching ready event on', me.el);
 		//send Queued
 		while(me._queue.length) {
 			me.send.apply(me, me._queue.shift());

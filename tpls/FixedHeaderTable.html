@@ -1,0 +1,108 @@
+<style>
+.FixedHeaderTable {
+	border: 1px solid #C8C8C8;
+	margin: 0;
+	padding: 0;
+	position: relative;
+	padding-top: 30px;
+	flex: 1 1 100%;
+	align-self: stretch;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-direction: column;
+	flex-direction: column;
+}
+
+
+
+.FixedHeaderTable>section {
+	overflow-x: hidden;
+	overflow-y: auto;
+	flex: 1 1 auto;
+	align-self: stretch;
+}
+
+.FixedHeaderTable>section>table {
+	-moz-user-select: none;
+	user-select: none;
+	background-color: transparent;
+	width: 100%;
+	overflow-x: hidden;
+	overflow-y: auto;
+	table-layout: fixed;
+}
+
+.FixedHeaderTable>section>table>thead>tr>th>span {
+	position: absolute;
+	top: 0;
+	line-height: 30px;
+	text-align: left;
+	border-left: 1px solid #C8C8C8;
+	padding-left: 10px;
+	margin-left: -5px;
+	color: #FFFFFF;
+}
+
+
+.FixedHeaderTable>section>table>thead>tr>th:first-child>span {
+	border-left: none;
+	padding-left: 15px;
+}
+.FixedHeaderTable>section>table>thead>tr>th {
+	top: 0;
+	padding: 0 5px;
+	text-align: left;
+}
+
+.FixedHeaderTable>section>table>tbody>tr>td {
+	border-bottom: 1px solid #ccc;
+	padding: 5px;
+	text-align: left;
+	vertical-align: middle;
+}
+
+.FixedHeaderTable>header {
+	background-color: #0D8BF2;
+	height: 30px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	flex: 1 1 auto;
+	align-self: stretch;
+	border-bottom: 1px solid #C8C8C8;
+}
+
+
+</style>
+
+<template id="jFresh.FixedHeaderTable">
+	<article>
+		<header></header>
+		<section>
+			<table></table>
+		</section>
+	</article>
+</template>
+
+<script type="text/javascript">
+
+
+jFresh.fn.FixedHeaderTable = function(el, opts) {
+	this.el = el;
+	this.opts = opts;
+	this.wrapper = jFresh.fn.Template.energize('jFresh.FixedHeaderTable', el.parentNode);
+	this.wrapper.classList.add('FixedHeaderTable');
+	el.parentNode.insertBefore( this.wrapper, el);
+	var foo = this.wrapper.querySelector('table');
+	foo.parentNode.insertBefore( el, foo );
+	foo.remove();
+
+	var me = this;
+	setTimeout(function() { //wait a bit to remove the class from the table since energize will auto-add it
+		me.el.classList.remove('FixedHeaderTable')
+	}, 100);
+
+};
+
+</script>

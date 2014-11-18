@@ -61,9 +61,9 @@ S_IWUSR    00200     owner has write permission
 S_IXUSR    00100     owner has execute permission
 		*/
 		mode = mode & 0170000;
-		if ( mode == 0040000 ) return 'FOLDER';
-		if ( mode == 0100000 ) return 'FILE';
-		if ( mode == 0120000 ) return 'SYMLINK';
+		if ( mode == 0040000 ) return 'folder';
+		if ( mode == 0100000 ) return 'file';
+		if ( mode == 0120000 ) return 'symlink';
 		return false; //unknown for now
 	},
 };

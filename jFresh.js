@@ -28,7 +28,7 @@ sessDb.serialize(function() {
 
 
 // all environments
-app.set('port', process.env.TEST_PORT || 8088);
+app.set('port', process.env.TEST_PORT || 443);
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
@@ -62,7 +62,6 @@ app.get('/jFresh.js', function (req, res) {
 	for(var i=0; i<tpls.length; i++) {
 		ext = path.extname(tpls[i]);
 		if ( ext != '.js' ) continue;
-		
 		data = fs.readFileSync(__dirname + '/tpls/' + tpls[i]);
 		res.write(data);
 		res.write("\r\n");
@@ -145,7 +144,6 @@ app.get('/', function (req, res) {
 		, idxStart = indexTpl.indexOf(jFreshTag)
 		, tpls = fs.readdirSync(__dirname + '/tpls')
 		, data
-		, dataWrap
 		, ext
 	;
 	
@@ -158,25 +156,13 @@ app.get('/', function (req, res) {
 		
 		data = fs.readFileSync(__dirname + '/tpls/' + tpls[i]);
 		res.write(data);
-		
-		if (dataWrap) {
-			res.write(dataWrap);
-			dataWrap = false;
-		}
+		res.write("\r\n");
+
 	}
 	
 	res.write( indexTpl.substr(idxStart+jFreshTag.length) );
 	res.end();
 });
-/*
-app.get('/remote', function (req, res) {
-  res.sendfile(__dirname + '/public/remote.html');
-});
-
-app.get('/play/:video_id', function (req, res) {
-
-});
-*/
 
 
 //Socket.io Config

@@ -56,7 +56,7 @@ jFresh.fn.NavCrumbs = function(el, opts) {
 		}
 		t.classList.add('selected');
 		me._val = t.getAttribute('data-uid');
-		me.el.fireEvent('change');
+		me.el.fireEvent('change', [me._val]);
 	});
 	
 	
@@ -75,7 +75,7 @@ jFresh.fn.NavCrumbs.prototype.val = function(crumb) {
 	this._val = crumb;
 	this.crumbs = crumb.split(this.opts.splitOn);
 	var me = this;
-	
+	this.el.innerHTML = '';
 	var chain = [];
 	for(var i=0; i<me.crumbs.length; i++) {
 		var c = me.crumbs[i];

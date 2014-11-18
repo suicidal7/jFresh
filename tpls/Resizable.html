@@ -40,7 +40,20 @@ jFresh.fn.Resizable = function(el, opts) {
 	if (style.position == 'static' ) el.style.position = 'relative';
 	jFresh.fn.Template.energize('jFresh.Resizable', el);
 	
-	var handle;
+	var handles = {};
+	if ( this.opts.which == 'all' ) this.opts.which = 'n s e w';
+	this.opts.which.split(/\s+/).forEach(function(k) {
+		handles[k]=1;
+	});
+	
+	['n', 's', 'e', 'w'].forEach(function(k) {
+		if ( !handles[k] ) el.querySelector('.Resizable-handle.'+k).style.display='none';
+	});
+	
+	['ne', 'se', 'nw', 'sw'].forEach(function(k) {
+		if ( !handles[ k[0] ] || !handles[ k[1] ] ) el.querySelector('.Resizable-handle.'+k).style.display='none';
+	});
+	
 	//~ if ( this.opts.resize == 'both' || this.opts.resize=='width' ) {
 		
 	//~ }
@@ -49,7 +62,7 @@ jFresh.fn.Resizable = function(el, opts) {
 };
 
 jFresh.fn.Resizable.defaults = {
-	resize: 'both', //both/height/width
+	which: 'all', //both/height/width
 };
 
 //sets up 1 event listener for all our resizable targets

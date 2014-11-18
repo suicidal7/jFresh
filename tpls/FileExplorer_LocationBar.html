@@ -1,0 +1,147 @@
+<style>
+
+.FileExplorer_LocationBar {
+		display: block;
+		box-sizing: border-box;
+		padding: 5px;
+}
+
+.FileExplorer_LocationBar>.NavCrumbs-wrapper {
+	display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		justify-content: center;
+		align-items: center;
+		align-content: stretch;
+}
+
+.FileExplorer_LocationBar>.NavCrumbs-wrapper>.IconButton {
+			flex: 0 1 auto;
+			margin: 0px 10px 0 0 !important;
+			align-self: auto;
+			order: 0;
+}
+.FileExplorer_LocationBar>.NavCrumbs-wrapper>.NavCrumbs {
+			flex: 1 1 80%;
+			order: 1;
+			align-self: auto;
+			overflow: hidden;
+}
+.FileExplorer_LocationBar>label {
+	flex: 1 1 100%;
+	align-self: flex-end;
+	order: 3;
+	margin-top: 5px;
+	display: flex;
+	overflow: hidden;
+	transition: height 0.5s ease-out;
+	height: 1.4em;
+}
+.FileExplorer_LocationBar>label.hide {
+	height: 0;
+}
+.FileExplorer_LocationBar>label>span {
+			flex: 0 0 auto;
+			align-self: flex-start;
+			order: 1;
+			padding-right: 10px;
+}
+.FileExplorer_LocationBar>label>input {
+			flex: 3 1 auto;
+			align-self: flex-start;
+			order: 2;
+}
+
+</style>
+
+
+<template id="jFresh.FileExplorer.LocationBar">
+	<div fn="FileExplorer_LocationBar">
+		<div class="NavCrumbs-wrapper">
+			<div fn="IconButton" class="i24 pen"></div>
+			<div fn="NavCrumbs" ></div>
+		</div>
+		<label><span>Location:</span><input type="text"></label>
+	</div>
+</template>
+
+
+<script type="text/javascript">
+
+jFresh.fn.FileExplorer_LocationBar = function(el, opts) {
+	var me = this;
+	me.el = el;
+	me.opts = opts;
+	
+	if ( this.opts.sktEl ) { //else assume we have the socket!
+		me.socketIO = me.el.closest( me.opts.sktEl ); //El
+		var onSktElReady =  function() {
+			me.socketIO.removeEventListener('SocketIO.ready', onSktElReady);
+			me.socketIO = me.socketIO.socketIO; //Obj
+		};
+
+		if ( me.socketIO.socketIO ) {
+			onSktElReady();
+		}
+		else {
+			me.socketIO.addEventListener('SocketIO.ready', onSktElReady);
+		}
+	}
+	else {
+		me.socketIO = me.el.socketIO;
+	}
+	
+	me.el.querySelector('.pen').addEventListener('click', function() {
+		me.el.getElementsByTagName('label')[0].toggleClass('hide');
+	});
+	
+};
+
+jFresh.fn.FileExplorer_LocationBar.defaults = {
+	sktEl: '',
+};
+
+jFresh.fn.FileExplorer_LocationBar.prototype = {
+	val: function(v, stat) {
+		if ( !arguments.length ) return this._val;
+		
+		var me = this;
+		this._val = {baseName: '', dirName: '', };
+		
+		var onStat = function(res) {
+			if ( fsTools.nodeType( res.d.mode ) == 'folder' ) {
+				me._val.dirName = v;
+				me._val.baseName = '';
+			}
+			else {
+				me._val.dirName = fsTools.dirName(v);
+				me._val.baseName = fsTools.baseName(v);
+			}
+			var path = me._val.dirName;
+			me.el.querySelector('.NavCrumbs').navCrumbs.val(path);
+			
+			/* get initial autocomplete ?
+			me.socketIO.send('js', [ 'fs.glob', path, {filter: '*', hidden: true} ], function(res) {
+				me.el.table.tbody.innerHTML='';
+				res.d = res.d.sort(function(a,b) {
+					if ( a.type==b.type ) {
+						if ( a.name < b.name ) return -1;
+						return 1;
+					}
+					if ( a.type=='folder' ) return -1;
+					return 1;
+				});
+				
+				for(var i=0; i<res.d.length; i++) { me.addFile(path, res.d[i]) };
+			});
+			*/
+		};
+		
+		//first lstat the target to figure out if its a folder or what...
+		if ( stat ) onStat({d: stat});
+		else me.socketIO.send('js', [ 'fs.lstatSync', v ], onStat);
+
+	},
+};
+
+</script>

@@ -1,6 +1,6 @@
 Node.prototype.closest = function(sel) {
 	var p = this;
-	while(!p.matches(sel) && !p.querySelector(sel) && p.parentNode) p = p.parentNode;
+	while(!p.matches(sel) && !p.querySelector(sel) && p.parentNode && p.parentNode.matches) p = p.parentNode;
 	return p.matches(sel) ? p : p.querySelector(sel);
 };
 
@@ -73,16 +73,18 @@ console.log('tethering to ', this);
 };
 
 
-Node.prototype.fireEvent = function(event){
+Node.prototype.fireEvent = function(event, udata){
 	if (document.createEventObject){
 		// dispatch for IE
 		var evt = document.createEventObject();
+		evt.userData = udata;
 		return this.fireEvent('on'+event,evt)
 	}
 	else{
 		// dispatch for firefox + others
 		var evt = document.createEvent("HTMLEvents");
 		evt.initEvent(event, true, true ); // event type,bubbling,cancelable
+		evt.userData = udata;
 		return !this.dispatchEvent(evt);
 	}
 };

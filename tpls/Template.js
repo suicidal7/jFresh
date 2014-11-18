@@ -51,7 +51,7 @@ jFresh.fn.Template.prototype.loadTemplate = function(tpl, container) {
 		//~ while(dummies.length) dummies[0].remove();
 		
 		container.appendChild( tplEl[i] );
-		jFresh.energize2( tplEl[i] );
+		jFresh.energize2( tplEl[i] , container);
 	}
 	
 	return tplEl;

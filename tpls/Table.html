@@ -1,0 +1,138 @@
+<style>
+
+
+.Table td, .Table th {
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+
+</style>
+
+<template id="jFresh.Table.thWrapper">
+	<th><span></span></th>
+</template>
+
+<template id="jFresh.Table.trWrapper">
+	<tr></tr>
+</template>
+
+<template id="jFresh.Table.tdWrapper">
+	<td></td>
+</template>
+
+
+<script type="text/javascript">
+
+
+jFresh.fn.Table = function(el, opts) {
+	this.el = el;
+	this.opts = opts;
+	this.colsOrder = [];
+	this.selected = [];
+	this.tbody = this.el.querySelector( this.opts.tbodySel );
+
+	
+	//first we check opts for a cols var
+	
+	//then we check for a thead in tpl, if so, use it to build cols var
+	var me=this, tr, th, col;
+	if ( !opts.cols && (tr = el.querySelector(this.opts.theadSel)) && tr.children.length ) {
+		opts.cols = {};
+		for(var i=0; i<tr.children.length; i++) {
+			th = tr.children[i];
+			col = {
+				idx: i,
+				title: th.getAttribute('data-title') || th.innerHTML,
+				hidden: th.getAttribute('data-hidden'),
+				align: th.getAttribute('data-align') || 'left',
+			};
+			col.name = th.getAttribute('data-key') || col.title.makeVarName();
+			opts.cols[col.name] = col;
+			opts.cols[col.idx] = col;
+			//replace this tr with a new skinned one!
+			var colEl = jFresh.fn.Template.energize( this.opts.thTpl, this.el );
+			colEl.querySelector(this.opts.thTitle).innerHTML = col.title;
+			tr.insertBefore(colEl, th);
+			th.remove();
+		}
+	}
+	//otherwise we start off with whatever and expect a later call to setCols() / addCol()
+	
+	//hide the column that should be hidden at startup
+	for(var k in opts.cols) {
+		if ( k.match(/^\d+$/) || !opts.cols.hasOwnProperty(k) ) continue;
+		this.colsOrder.push(k);
+		if ( opts.cols[k].hidden ) this.hideCol(k, true);
+	}
+	
+	if ( this.opts.allowSelect ) {
+		this.tbody.addEventListener('click', function(ev) {
+			var t = ev.target;
+			while(t.parentNode!=me.tbody) t=t.parentNode;
+			if ( me.opts.allowSelect<2 || !ev.ctrlKey ) { //single selection or no ctrl?
+				while( me.selected.length ) me.selected.pop().classList.remove('selected');
+			}
+			t.classList.add('selected');
+			me.selected.push(t);
+		});
+	}
+};
+
+jFresh.fn.Table.defaults = {
+	thTpl: 'jFresh.Table.thWrapper',
+	trTpl: 'jFresh.Table.trWrapper',
+	tdTpl: 'jFresh.Table.tdWrapper',
+	theadSel: 'thead>tr', //el.querySelector(theadSel)  (after that we used .children for thead columns)
+	tbodySel: 'tbody', //el.querySelector(tbodySel)  (after that we used .children for rows)
+	tdSel: '', //tbodySel.children[i].querySelector(tdSel) only needed when cells are wrapped inside a row
+	thTitle: 'span', //th.querySelector(tdTitle) to get element for which we set innerHTML
+	tdTitle: '', //td.querySelector(tdTitle) to get element for which we set innerHTML
+	allowSelect: 0, //0=no,1=single,2=multi
+};
+
+jFresh.fn.Table.prototype.hideCol = function(colName, hide) { //hide=true/false
+	hide = hide ? 'hide' : 'show';
+	var idx = this.colsOrder.indexOf(colName);
+	if ( idx<0 ) return;
+	
+	//hide the col in header
+	var tr = this.el.querySelector(this.opts.theadSel);
+	if ( tr ) tr.children[idx][hide]();
+	
+	//hide the col in the rows
+	var tbody = this.tbody;
+	for(var i=0; i<tbody.children.length; i++) {
+		var tr = tbody.children[i];
+		if ( this.opts.tdSel ) tr = tr.querySelector(this.opts.tdSel);
+		if (tr) tr.children[idx][hide]();
+	}
+};
+
+jFresh.fn.Table.prototype.addRow = function(row, uid) {
+	var tr;
+	tr = jFresh.fn.Template.energize( this.opts.trTpl, this.tbody );
+	if (uid) tr.setAttribute('data-uid', uid);
+	if ( this.opts.tdSel ) tr = tr.querySelector(this.opts.tdSel);
+	
+	var type = row instanceof Array ? 0 : 1; //array or object
+	
+	for(var c=0; c<this.colsOrder.length; c++) {
+		var td = jFresh.fn.Template.energize( this.opts.tdTpl, tr );
+		if ( this.opts.tdTitle ) td = td.querySelector(this.opts.tdTitle);
+		if (td) {
+			var col = this.opts.cols[ this.colsOrder[c] ];
+			td.style.textAlign = col.align;
+			td.innerHTML = row[ col[ type==0 ? 'idx' : 'name' ] ];
+			if ( col.hidden ) td.hide();
+		}
+	}
+	
+	
+	return tr;
+};
+
+
+
+
+</script>

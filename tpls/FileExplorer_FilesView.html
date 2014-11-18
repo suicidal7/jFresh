@@ -1,0 +1,370 @@
+<style>
+.FileExplorer_FilesView.icon-view {
+	padding: 0;
+}
+
+.FileExplorer_FilesView.icon-view table:first-of-type>tbody {
+	padding: 10px;
+	display: -webkit-flex;
+	display: flex;
+	-webkit-flex-wrap: wrap;
+	flex-wrap: wrap;
+	-webkit-flex-direction: row;
+	flex-direction: row;
+}
+
+.FileExplorer_FilesView.icon-view table:first-of-type>thead,
+.FileExplorer_FilesView.icon-view>.header-background { 
+	display: none; 
+}
+
+.FileExplorer_FilesView.icon-view table:first-of-type>tbody>tr { 
+	display: flex;
+	flex: 0 0 auto;
+	background-color: inherit;
+	width: 178px;
+	border-left: 1px solid transparent;
+	border-right: 1px solid transparent;
+}
+
+.FileExplorer_FilesView.icon-view table:first-of-type>tbody>tr.selected { 
+	border-left: 1px solid #EBEAA7 !important;
+	border-right: 1px solid #EBEAA7 !important;
+}
+
+.FileExplorer_FilesView.icon-view table:first-of-type>tbody>tr>td { 
+	border: 0;
+	display: block;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	padding: 0;
+}
+.FileExplorer_FilesView.icon-view table:first-of-type>tbody>tr>td:nth-child(n+2) {
+	display: none;
+}
+	
+.FileExplorer_FilesView.icon-view.medium table:first-of-type>tbody>tr {
+	width: 80px;
+	margin-bottom: 5px;
+	padding: 5px;
+	border: 1px solid transparent;
+}
+
+.FileExplorer_FilesView.icon-view.medium table:first-of-type>tbody>tr>td {
+	height: auto;
+	text-align: center;
+	margin: auto;
+}
+.FileExplorer_FilesView.icon-view.medium table:first-of-type>tbody>tr>td .icon.folder {
+	background-image: url('imgs/Betelgeuse/48x48/mimetypes/inode-directory.png');
+}
+.FileExplorer_FilesView.icon-view.medium table:first-of-type>tbody>tr>td .icon {
+	display: block;
+	width: 48px;
+	height: 48px;
+}
+.FileExplorer_FilesView.icon-view.medium table:first-of-type>tbody>tr>td>* {
+	margin: auto;
+	padding: 0;
+}
+.FileExplorer_FilesView.icon-view.medium table:first-of-type>tbody>tr>td>span {
+	word-wrap: break-word;
+	width: 100%;
+	display: block;
+	white-space: normal;
+	line-height: 1.1em;
+	padding-top: 5px;
+}
+.FileExplorer_FilesView.icon-view.medium.large table:first-of-type>tbody>tr>td .icon.folder {
+	background-image: url('imgs/Betelgeuse/128x128/mimetypes/inode-directory.png');
+}
+.FileExplorer_FilesView.icon-view.medium.large table:first-of-type>tbody>tr>td .icon {
+	display: block;
+	width: 96px;
+	height: 96px;
+}
+.FileExplorer_FilesView.icon-view.medium.large table:first-of-type>tbody>tr {
+	width: 110px;
+}
+.FileExplorer_FilesView.icon-view.medium.large.xl table:first-of-type>tbody>tr>td .icon{
+	display: block;
+	width: 256px;
+	height: 256px;
+}
+.FileExplorer_FilesView.icon-view.medium.large.xl table:first-of-type>tbody>tr {
+	width: 260px;
+}
+
+.FileExplorer_FilesView ins.icon {
+	margin-right: 5px;
+	width: 24px;
+	height: 24px;
+	display: inline-block;
+	position: relative;
+	vertical-align: middle;
+	background: transparent url('imgs/mimetypes/32px/_blank.png') top left no-repeat;
+	background-size: 100% 100%;
+	vertical-align: middle !middle;
+}
+.FileExplorer_FilesView .icon .icon{
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.FileExplorer_FilesView .icon.folder{
+	background-image: url('imgs/Betelgeuse/24x24/mimetypes/inode-directory.png');
+}
+
+.FileExplorer_FilesView .icon .symlink{
+	background-size: 70%;
+	-background-position: bottom right;
+	background-image: url('imgs/fatcow/32x32/link.png');
+}
+
+.FileExplorer_FilesView tr td {
+	cursor: default;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+</style>
+
+<template id="jFresh.FileExplorer.FilesView">
+	<table fn="Table FixedHeaderTable FileExplorer_FilesView" Table-allowSelect="2">
+<colgroup>
+    <col style="width:60%">
+    <col style="width:20%">
+    <col style="width:20%">
+  </colgroup>
+		<thead>
+			<tr>
+				<td width="60%" data-key="name">Filename</td><td width="20%" data-key="size" data-align="right">Size</td><td width="20%" data-key="mtime" data-align="right">Modified</td><td data-hidden="true" data-key="ctime">Created</td><td data-hidden="true" data-key="type">Type</td><td data-hidden="true" data-key="mode">Access</td>
+			</tr>
+		</thead>
+		<tbody>
+
+		</tbody>
+	</table>
+</template>
+
+
+<script type="text/javascript">
+
+
+
+jFresh.fn.FileExplorer_FilesView = function(el, opts) {
+	this.el = el;
+	this.opts = opts;
+	var me = this;
+	
+	me._viewType = 'details'; //default view type
+
+	if ( this.opts.sktEl ) { //else assume we have the socket!
+		me.socketIO = me.el.closest( me.opts.sktEl ); //El
+		var onSktElReady =  function() {
+			me.socketIO.removeEventListener('SocketIO.ready', onSktElReady);
+			me.socketIO = me.socketIO.socketIO; //Obj
+			me.loadMimeTypeImgs();
+		};
+
+		if ( me.socketIO.socketIO ) {
+			onSktElReady();
+		}
+		else {
+			me.socketIO.addEventListener('SocketIO.ready', onSktElReady);
+		}
+	}
+	else {
+		me.socketIO = me.el.socketIO;
+		me.loadMimeTypeImgs(); //assume we have sktio
+	}
+	//~ skt.send('js', [ 'fs.lstatSync', '/home/'+localStorage.user, '', true ], function(res) {
+	
+	
+	me.el.table.tbody.addEventListener('dblclick', function(ev) {
+		var t = ev.target;
+		while(t.parentNode!=me.el.table.tbody) t=t.parentNode;
+		var tr = me.el.table.selected[0];
+		var file = tr.__file;
+		if ( file.type == 'folder' ) {
+			//~ alert(file.name);
+			var path = me._val.dirName+'/'+file.name;
+			me.val( path, file );
+			me.el.fireEvent('change', [path, file]);
+		}
+	});
+
+	
+	
+	/*setTimeout(function() {
+		var path = '/home/'+localStorage.user;
+		skt.send('js', [ 'fs.glob', path, {filter: '*', details: true} ], function(res) {
+			res.d = res.d.sort(function(a,b) {
+				if ( a.type==b.type ) {
+					if ( a.name < b.name ) return -1;
+					return 1;
+				}
+				else {
+					if ( a.type=='folder' ) return -1;
+					return 1;
+				}
+			});
+			
+			for(var i=0; i<res.d.length; i++) { me.addFile(path, res.d[i]) };
+		});
+	}, 500);*/
+};
+
+jFresh.fn.FileExplorer_FilesView.defaults = {
+	sktEl: '',
+};
+
+jFresh.fn.FileExplorer_FilesView.prototype = {
+	loadMimeTypeImgs: function() {
+		var me = this;
+		//todo: maybe move this somewhere more generic & runs after login?!
+		if ( !jFresh.__mimeTypeImgs ) {
+			jFresh.__mimeTypeImgs = [];
+			me.socketIO.send('js', [ 'fs.glob', './public/imgs/mimetypes/48px', {filter: '*.png'} ], function(res) {
+				for(var i=0; i<res.d.length; i++) {
+					jFresh.__mimeTypeImgs.push( res.d[i].substr(0, res.d[i].length-4 ) );
+				}
+			});
+		}
+	},
+	getViews: function() {
+		//return available views
+		return [ 'details', 'small-icons', 'medium-icons', 'large-icons', 'xl-icons' ];
+	},
+	getView: function() {
+		return this._viewType;
+	},
+	setView: function(type) {
+		var me = this;
+		if ( me._viewType == type ) return; 
+		
+		var allFormats = 'icon-view medium large xl';
+		var newFormat = '';
+		var resizeIcons = 0;
+		me._viewType = type;
+		
+		switch(type) {
+		case 'details':
+			break;
+		case 'small-icons':
+			newFormat = 'icon-view';
+			break;
+		case 'medium-icons':
+			newFormat = 'icon-view medium';
+			resizeIcons = 1;
+			break;
+		case 'large-icons':
+			newFormat = 'icon-view medium large';
+			resizeIcons = 2;
+			break;
+		case 'xl-icons':
+			newFormat = 'icon-view medium large xl';
+			resizeIcons = 3;
+			break;
+		}
+		
+		me.element.removeClass( allFormats ).addClass(newFormat);
+		me.resizeIcons = resizeIcons;
+		if (resizeIcons) {
+			var w1 = resizeIcons==1 ? 48 : 512 , w2 = resizeIcons == 1 ? 48 : 128;
+			me.element.find('.icon').each(function() {
+				var m, url = $(this).css('background-image'), newUrl;
+
+				if ( m = url.match(/\/(\d+)px\// ) ) newUrl = url.replace(m[1]+'px', w1+'px');
+				else if ( m = url.match(/\/(\d+)x(\d+)\//) ) newUrl = url.replace(m[1]+'x'+m[2],w2+'x'+w2);
+				
+				if ( newUrl ) {
+					//~ console.log('img URL', url, newUrl);
+					$(this).css('background-image', newUrl );
+				}
+				
+				if ( ! $(this).parent().is('ins') ) {
+					var uid = $(this).closest('[uid]').attr('uid');
+					var mt = fsTools.mimeType( uid );
+					if ( mt && mt.startsWith('image/') ) {
+						me._getThumb(uid, me.getIconSize());
+					}
+				}
+			});
+		}
+	},
+	getIconSize: function() {
+		if ( this.resizeIcons > 1 ) return 512;
+		if ( this.resizeIcons === 1 ) return 48;
+		return 32;
+	},
+
+	addFile: function(path, file) {
+		var dt = new Date(file.mtime);
+		file.mtime = String("00" + dt.getDate()).slice(-2)+'/'+String("00" + (dt.getMonth()+1)).slice(-2)+'/'+dt.getFullYear();
+		file.size = fsTools.formatSize( file.size );
+	
+		var tr = this.el.table.addRow(file, path+'/'+file.name);
+		var td = tr.children[0];
+		var ins = document.createElement('ins');
+		ins.classList.add('icon');
+		ins.classList.add('i24');
+		var ext = fsTools.ext(file.name);
+
+		if ( file.type == 'file' && ext && jFresh.__mimeTypeImgs.indexOf( ext )>-1 ) ins.style.backgroundImage = "url('imgs/mimetypes/48px/"+ext+".png')";
+		else if ( file.type == 'folder' ) ins.classList.add('folder');
+		td.insertBefore( ins, td.firstChild );
+		tr.__file = file;
+	},
+
+	val: function(v, stat) {
+		var me = this;
+		
+		//getter
+		if ( !arguments.length ) return; //todo: 
+		
+		//setter
+		me.el.table.tbody.innerHTML='LOADING...';
+		if ( typeof(v)=='object') {
+
+		}
+		else {
+			this._val = {baseName: '', dirName: '', };
+			
+			var onStat = function(res) {
+				if ( fsTools.nodeType( res.d.mode ) == 'folder' ) {
+					me._val.dirName = v;
+					me._val.baseName = '';
+				}
+				else {
+					me._val.dirName = fsTools.dirName(v);
+					me._val.baseName = fsTools.baseName(v);
+				}
+				var path = me._val.dirName;
+				me.socketIO.send('js', [ 'fs.glob', path, {filter: '*', details: true} ], function(res) {
+					me.el.table.tbody.innerHTML='';
+					res.d = res.d.sort(function(a,b) {
+						if ( a.type==b.type ) {
+							if ( a.name < b.name ) return -1;
+							return 1;
+						}
+						if ( a.type=='folder' ) return -1;
+						return 1;
+					});
+					
+					for(var i=0; i<res.d.length; i++) { me.addFile(path, res.d[i]) };
+				});
+			};
+			
+			//first lstat the target to figure out if its a folder or what...
+			if ( stat ) onStat({d: stat});
+			else me.socketIO.send('js', [ 'fs.lstatSync', v ], onStat);
+		}
+	},
+};
+
+</script>
+
+

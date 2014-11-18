@@ -1,0 +1,166 @@
+<style>
+
+.FileExplorer_Places {
+	flex: 1 1 auto;
+	overflow-x: none;
+	overflow-y: auto;
+}
+
+.FileExplorer_Places>li {
+			line-height: 16px;
+			padding: 0px 5px 2px 10px;
+			white-space: nowrap;
+}
+
+.FileExplorer_Places>.title {
+			font-weight: bold;
+			margin: 5px 10px;
+			padding: 0px;
+			font-size: 1.2em;
+}
+
+.FileExplorer_Places>.link {
+			cursor: pointer;
+}
+
+.FileExplorer_Places>.link>ins {
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+	vertical-align: middle;
+	margin-right: 5px;
+	background: transparent url(imgs/fatcow/16x16/folder.png) top left no-repeat;
+}
+.FileExplorer_Places>.link>ins.places-Home {
+	background: transparent url(imgs/fatcow/16x16/house.png) top left no-repeat;
+}
+.FileExplorer_Places>.link>ins.places-Desktop {
+	background: transparent url(imgs/fatcow/16x16/desktop.png) top left no-repeat;
+}
+.FileExplorer_Places>.link>ins.places-Documents {
+	background: transparent url(imgs/fatcow/16x16/document_copies.png) top left no-repeat;
+}
+.FileExplorer_Places>.link>ins.places-Downloads {
+	background: transparent url(imgs/fatcow/16x16/download.png) top left no-repeat;
+}
+.FileExplorer_Places>.link>ins.places-Music {
+	background: transparent url(imgs/fatcow/16x16/music.png) top left no-repeat;
+}
+.FileExplorer_Places>.link>ins.places-Pictures {
+	background: transparent url(imgs/fatcow/16x16/camera_small.png) top left no-repeat;
+}
+.FileExplorer_Places>.link>ins.places-Videos {
+	background: transparent url(imgs/fatcow/16x16/film.png) top left no-repeat;
+}
+.FileExplorer_Places>.link>ins.places-Computer {
+	background: transparent url(imgs/fatcow/16x16/computer.png) top left no-repeat;
+}
+
+</style>
+
+<template id="jFresh.FileExplorer.Places.titleItem">
+	<li class="title">Places</li>
+</template>
+<template id="jFresh.FileExplorer.Places.item">
+	<li class="link"><ins></ins><span></span></li>
+</template>
+
+
+
+<script type="text/javascript">
+
+
+jFresh.fn.FileExplorer_Places = function(el, opts) {
+	this.el = el;
+	this.opts = opts;
+	var me = this;
+	
+	var userHome = '/home/'+localStorage.user;
+	
+	this.addTitle('Places');
+	this.addLink('Home', userHome);
+	var p, places = [ 'Desktop', 'Documents', 'Downloads', 'Music', 'Pictures', 'Videos'  ];
+	for(var i=0; i<places.length; i++) {
+		p = places[i];
+		this.addLink(p, userHome+'/'+p);
+	}
+	this.addLink('Temp', '/tmp');
+	
+	this.addTitle('Devices');
+	this.addLink('Computer', '/');
+	
+	this.addTitle('Bookmarks');
+
+	var req = new XMLHttpRequest();
+	req.onreadystatechange = function() {
+		if ( req.readyState!=4 || req.status!=200 ) return;
+			var places = req.responseText.split("\n");
+			for(var p=0; p<places.length; p++) {
+				if ( !places[p].startsWith('file://') ) continue;
+				
+				var filename = places[p].substr(7);
+				var basename;
+				var idx = filename.search(/[^\\]\s/);
+				if ( idx > 0 ) {
+					basename = filename.substr( idx+2 );
+					filename = filename.substr( 0, idx+1 );
+				}
+				else {
+					basename = fsTools.baseName( filename );
+				}
+				if ( me.el.querySelector('[data-uid="'+filename+'"]') ) continue; //already added
+				me.addLink(basename, filename);
+			}
+		
+	};
+	req.open('GET', '/file'+userHome+'/.gtk-bookmarks', true);
+	req.send();
+	
+	this.el.addEventListener('click', function(ev) {
+		var t = ev.target;
+		while( t.parentNode != me.el ) t = t.parentNode;
+		var uid = t.getAttribute('data-uid');
+		if ( uid ) {
+			me.val(uid);
+			me.el.fireEvent('change', [ uid ] );
+		}
+	});
+};
+
+jFresh.fn.FileExplorer_Places.defaults = {
+	titleTpl: 'jFresh.FileExplorer.Places.titleItem',
+	itemTpl: 'jFresh.FileExplorer.Places.item',
+	titleEl: '.title',
+	linkEl: '.link>span',
+	iconEl: '.link>ins',
+	classPrefix: 'places-',
+};
+
+jFresh.fn.FileExplorer_Places.prototype.addTitle = function(title) {
+	var el = jFresh.fn.Template.energize(this.opts.titleTpl, this.el);
+	el.closest(this.opts.titleEl).innerHTML = title;
+};
+
+jFresh.fn.FileExplorer_Places.prototype.addLink = function(title, uid) {
+	var el = jFresh.fn.Template.energize(this.opts.itemTpl, this.el);
+	el.closest(this.opts.iconEl).classList.add(this.opts.classPrefix+title);
+	el.closest(this.opts.linkEl).innerHTML = title;
+	el.setAttribute('data-uid', uid);
+};
+
+jFresh.fn.FileExplorer_Places.prototype.val = function(v, stat) {
+	if ( !arguments.length ) return this._val;
+	
+	this._val = v;
+	for(var i=0; i<this.el.children.length; i++) {
+		if ( this.el.children[i].getAttribute('data-uid') == v ) {
+			this.el.children[i].classList.add('selected');
+		}
+		else {
+			this.el.children[i].classList.remove('selected');
+		}
+	}
+};
+
+
+</script>
