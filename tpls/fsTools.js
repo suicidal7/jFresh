@@ -57,7 +57,7 @@ S_ISGID    0002000   set-group-ID bit (see below)
 S_ISVTX    0001000   sticky bit (see below)
 S_IRWXU    00700     mask for file owner permissions
 S_IRUSR    00400     owner has read permission
-S_IWUSR    00200     owner has write permission
+S_IWUSR    00200     owner has write permission1
 S_IXUSR    00100     owner has execute permission
 		*/
 		mode = mode & 0170000;
@@ -66,5 +66,19 @@ S_IXUSR    00100     owner has execute permission
 		if ( mode == 0120000 ) return 'symlink';
 		return false; //unknown for now
 	},
+	
+	cleanPath: function(path) {
+		if ( !path || !path.length ) return '/';
+		path = path.split('/');
+		var res = [];
+		for(var i=0; i<path.length; i++) {
+			if ( path[i] == '.' ) continue;
+			else if ( path[i] == '..' ) res.pop();
+			else if ( path[i].length ) res.push(path[i]);
+		}
+		res = res.join('/');
+		return !res.length ? '/' : '/'+res;
+	},
+	
 };
 

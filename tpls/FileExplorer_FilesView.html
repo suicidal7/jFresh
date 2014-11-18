@@ -190,7 +190,7 @@ jFresh.fn.FileExplorer_FilesView = function(el, opts) {
 		var file = tr.__file;
 		if ( file.type == 'folder' ) {
 			//~ alert(file.name);
-			var path = me._val.dirName+'/'+file.name;
+			var path = fsTools.cleanPath(me._val.dirName+'/'+file.name);
 			me.val( path, file );
 			me.el.fireEvent('change', [path, file]);
 		}
@@ -315,13 +315,19 @@ jFresh.fn.FileExplorer_FilesView.prototype = {
 
 		if ( file.type == 'file' && ext && jFresh.__mimeTypeImgs.indexOf( ext )>-1 ) ins.style.backgroundImage = "url('imgs/mimetypes/48px/"+ext+".png')";
 		else if ( file.type == 'folder' ) ins.classList.add('folder');
+		else if ( file.type == 'symlink' ) {
+			var subIns = document.createElement('ins');
+			subIns.classList.add('icon');
+			subIns.classList.add('symlink');
+			ins.appendChild(subIns);
+		}
 		td.insertBefore( ins, td.firstChild );
 		tr.__file = file;
 	},
 
 	val: function(v, stat) {
 		var me = this;
-		
+console.log('FilesView.val', v, stat);
 		//getter
 		if ( !arguments.length ) return; //todo: 
 		
@@ -345,6 +351,8 @@ jFresh.fn.FileExplorer_FilesView.prototype = {
 				var path = me._val.dirName;
 				me.socketIO.send('js', [ 'fs.glob', path, {filter: '*', details: true} ], function(res) {
 					me.el.table.tbody.innerHTML='';
+					if ( !res.d ) res.d=[];
+console.log('fs.glob', path, res);
 					res.d = res.d.sort(function(a,b) {
 						if ( a.type==b.type ) {
 							if ( a.name < b.name ) return -1;

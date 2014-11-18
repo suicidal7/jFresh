@@ -61,12 +61,106 @@
 			<div fn="IconButton" class="i24 pen"></div>
 			<div fn="NavCrumbs" ></div>
 		</div>
-		<label><span>Location:</span><input type="text"></label>
+		<label><span>Location:</span><input type="text" fn="AutoComplete" AutoComplete-acKey="191"></label>
 	</div>
 </template>
 
 
-<script type="text/javascript">
+<script type="text/javascript">1
+
+jFresh.fn.AutoComplete = function(el, opts) {
+	var me = this;
+	me.el = el;
+	me.opts = opts;
+	
+	me._requested = {};
+	
+	var uid = jFresh.uuid();
+	el.insertAdjacentHTML('afterend', '<datalist id="'+uid+'"></datalist>');
+	me.datalistEl = el.nextElementSibling;
+	me.el.setAttribute('list',uid);
+	
+	if ( me.opts.fnEl ) {
+console.log('hooking autocomplete 1');
+		me.hookAutoComplete(me.el.closest(me.opts.fnEl));
+	}
+	else if ( me.el.autoCompleteFn ) {
+console.log('hooking autocomplete 0');
+		me.hookAutoComplete(me.el.autoCompleteFn);
+	}
+	
+	
+};
+
+jFresh.fn.AutoComplete.defaults = {
+	fnEl: '', //this.el.closest(fnEl).autoCompleteFn() otherwise, this.el.autoCompleteFn()
+	acKey: 1, //1=means refresh on any new char, otherwise we expect a key
+};
+
+jFresh.fn.AutoComplete.prototype = {
+	setOptions: function(opts, append) {
+		if ( typeof opts =='function' ) {
+			return this.hookAutoComplete(opts);
+		}
+		var me = this;
+		if (!append) {
+			this.datalistEl.innerHTML='';
+			this._requested = {};
+		}
+		for(var i=0; i<opts.length; i++) {
+			this.datalistEl.innerHTML += '<option>'+opts[i]+'</option>';
+		}
+		
+		if ( opts.length < 1 ) {
+			me.refreshAutoComplete.call(me, true);
+		}
+	},
+	hookAutoComplete: function(fn) {
+		var me = this;
+		var timer;
+		me.autoCompleteCallback = fn;
+		me.el.addEventListener('keyup', function(ev) {
+//~ console.log('keyup', this.value, ev.keyCode, ev);
+			if ( ev.keyCode==13 ) {
+				me.el.fireEvent('change', [ me.el.value ]);
+				return false;
+			}
+			if ( me.opts.acKey!==1 ) { //if we have a specific char for auto complete refresh ( such as / in folders)
+				if ( ev.keyCode != me.opts.acKey ) return;
+			}
+			me.refreshAutoComplete.call(me,true);
+		});
+		me.el.addEventListener('paste', function(ev) {
+			if ( me.opts.acKey!==1 ) { //if we have a specific char for auto complete refresh ( such as / in folders)
+				//~ if ( !me.el.value.endsWith( me.opts.acKey )) return;
+				if ( !me.el.value.endsWith( '/' )) return; //fix this keyCode shit
+			}
+			me.refreshAutoComplete.call(me, true);
+		});
+	},
+	refreshAutoComplete: function(now) {
+		var me = this;
+		
+		if ( me._requested.hasOwnProperty(me.el.value) ) return;
+		me._requested[ me.el.value ] = 1;
+		
+		if (me.timer) clearTimeout(me.timer);
+		
+		if ( now ) {
+			me.autoCompleteCallback(me.el.value, function(opts) {
+				me.setOptions(opts, true);
+			});
+		}
+		else {
+			me.timer = setTimeout(function() {
+				me.autoCompleteCallback(me.el.value, function(opts) {
+					me.setOptions(opts, true);
+				});
+			}, 600);
+		}
+	},
+};
+
 
 jFresh.fn.FileExplorer_LocationBar = function(el, opts) {
 	var me = this;
@@ -91,6 +185,37 @@ jFresh.fn.FileExplorer_LocationBar = function(el, opts) {
 		me.socketIO = me.el.socketIO;
 	}
 	
+	me.textEl = me.el.querySelector('input[type=text]');
+	me.textEl.autoCompleteFn = function(path, cb) {
+		var fullPath = path;
+		if (path[0]!='/') fullPath = me._val.dirName+'/'+path;
+		var opts = {hidden: true};
+		fullPath = fsTools.cleanPath(fullPath);
+		console.log('needOptionsFor',path, opts, fullPath);
+				me.socketIO.send('js', ['fs.glob', fullPath, opts], function(res) {
+					if ( !res.d ) return;
+					for(var i=0; i<res.d.length; i++) {
+						res.d[i] = path + res.d[i];
+					}
+					if (cb) cb(res.d);
+				});
+	};
+	
+	me.textEl.addEventListener('change', function(ev) {
+		//dont let anyone know we changed until we hit enter key in text box basically
+		if ( ev.userData ) {
+			var path = ev.userData[0];
+			var fullPath = path;
+			var firstChar = path[0];
+			if ( firstChar!='/' ) fullPath = me._val.dirName+'/'+path;
+			me.el.fireEvent('change', [fullPath]);
+		}
+		ev.stopPropagation();
+		ev.preventDefault();
+		return false;
+	});
+	
+	
 	me.el.querySelector('.pen').addEventListener('click', function() {
 		me.el.getElementsByTagName('label')[0].toggleClass('hide');
 	});
@@ -107,8 +232,9 @@ jFresh.fn.FileExplorer_LocationBar.prototype = {
 		
 		var me = this;
 		this._val = {baseName: '', dirName: '', };
-		
+console.log('new val', this._val);
 		var onStat = function(res) {
+console.log('val stat', res);
 			if ( fsTools.nodeType( res.d.mode ) == 'folder' ) {
 				me._val.dirName = v;
 				me._val.baseName = '';
@@ -119,6 +245,9 @@ jFresh.fn.FileExplorer_LocationBar.prototype = {
 			}
 			var path = me._val.dirName;
 			me.el.querySelector('.NavCrumbs').navCrumbs.val(path);
+			me.textEl.value='';
+			me.textEl.autoComplete.setOptions([]);
+			me.textEl.fireEvent('change');
 			
 			/* get initial autocomplete ?
 			me.socketIO.send('js', [ 'fs.glob', path, {filter: '*', hidden: true} ], function(res) {

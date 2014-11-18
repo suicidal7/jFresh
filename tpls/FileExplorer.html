@@ -85,11 +85,14 @@ jFresh.fn.FileExplorer = function(el, opts) {
 	
 	
 	me.el.addEventListener('change', function(ev) {
+		if ( !ev.userData ) return;
+		ev.userData[0] = fsTools.cleanPath( ev.userData[0] );
 		if ( ev.target == me.filesView ) {
 			me.locationBar.fileExplorer_LocationBar.val(ev.userData[0], ev.userData[1]);
 			me.places.fileExplorer_Places.val(ev.userData[0]);
 		}
 		else if ( ev.target == me.locationBar || me.locationBar.contains(ev.target) ) {
+			me.locationBar.fileExplorer_LocationBar.val(ev.userData[0]);
 			me.filesView.fileExplorer_FilesView.val(ev.userData[0]);
 			me.places.fileExplorer_Places.val(ev.userData[0]);
 		}
@@ -97,12 +100,23 @@ jFresh.fn.FileExplorer = function(el, opts) {
 			me.locationBar.fileExplorer_LocationBar.val(ev.userData[0]);
 			me.filesView.fileExplorer_FilesView.val(ev.userData[0]);
 		}
-	}, true);
+	});
 
+	var onReady = function(ev) {
+		if ( ev.target !== me. el ) return false;
+		me.val( '/home/'+localStorage.user );
+		me.el.removeEventListener('ready', onReady);
+	};
+	me.el.addEventListener('ready', onReady);
+	
 };
 
 jFresh.fn.FileExplorer.defaults = {
 	sktEl: '.SocketIO', //this.el.closest(sktEl)
+};
+
+jFresh.fn.FileExplorer.appInfo = {
+	title: 'FileExplorer',
 };
 
 jFresh.fn.FileExplorer.prototype = {
@@ -110,6 +124,8 @@ jFresh.fn.FileExplorer.prototype = {
 		if ( !arguments.length ) return this._val;
 		
 		var me = this;
+		
+		v = fsTools.cleanPath( v );
 		
 		me.filesView = me.el.querySelector('.FileExplorer_FilesView');
 		me.locationBar = me.el.querySelector('.FileExplorer_LocationBar');

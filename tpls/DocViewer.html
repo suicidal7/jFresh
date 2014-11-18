@@ -1,0 +1,40 @@
+<style>
+.DocViewer {
+	flex: 1 1 auto;
+	align-self: stretch;
+}
+</style>
+
+
+<template id="jFresh.DocViewer">
+	<iframe fn="DocViewer"></iframe>
+</template>
+
+<script type="text/javascript">
+
+jFresh.fn.DocViewer = function(el, opts) {
+	var me = this;
+	me.el = el;
+	me.opts = opts;
+	
+};
+
+jFresh.fn.DocViewer.defaults = {
+	sktEl: '.SocketIO', //this.el.closest(sktEl)
+};
+
+jFresh.fn.DocViewer.appInfo = {
+	title: 'DocViewer',
+};
+
+
+jFresh.fn.DocViewer.prototype = {
+	launch: function(args) {
+		if ( args instanceof Array ) args = args.shift(); //todo: deal with opening multiple docs, either launch new windows or new tabs?!
+		
+		this.el.src = args;
+	},
+};
+
+
+</script>

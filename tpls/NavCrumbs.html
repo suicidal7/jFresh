@@ -51,16 +51,11 @@ jFresh.fn.NavCrumbs = function(el, opts) {
 	this.el.addEventListener('click', function(ev) {
 		var t = ev.target.parent('.NavCrumbs-item');
 		if ( !t ) return;
-		for(var i =0; i<me.el.children.length;i++) {
-			me.el.children[i].classList.remove('selected');
-		}
-		t.classList.add('selected');
-		me._val = t.getAttribute('data-uid');
+		me.setSelected( t );
 		me.el.fireEvent('change', [me._val]);
 	});
 	
-	
-	this.val('/home/foobar/test/subfolders/stuff');
+	me.el.innerHTML = 'Loading...';
 };
 
 jFresh.fn.NavCrumbs.defaults = {
@@ -70,25 +65,50 @@ jFresh.fn.NavCrumbs.defaults = {
 	itemText: 'a', //element in tpl to set .innerHTML
 };
 
+jFresh.fn.NavCrumbs.prototype.setSelected = function(uid) {
+	var me=this
+		, el = typeof(uid) =='string' ? null : uid
+		, ch
+		, fn
+	;
+	
+	for(var i =0; i<me.el.children.length;i++) {
+		ch = me.el.children[i];
+		if ( el===ch || ch.getAttribute('data-uid')===uid ) {
+			fn = 'add';
+			me._val = ch.getAttribute('data-uid');
+		}
+		else {
+			fn = 'remove';
+		}
+		me.el.children[i].classList[ fn ]('selected');
+	}
+};
+
 jFresh.fn.NavCrumbs.prototype.val = function(crumb) {
 	if ( !arguments.length ) return this._val;
-	this._val = crumb;
-	this.crumbs = crumb.split(this.opts.splitOn);
 	var me = this;
-	this.el.innerHTML = '';
+	//if we have same value already, set as selected and return
+	for(var i=0; i<me.el.children.length; i++) {
+		if ( me.el.children[i].getAttribute('data-uid') == crumb ) {
+			return me.setSelected(crumb);
+		}
+	}
+	
+	me._val = crumb;
+	me.crumbs = crumb.split(me.opts.splitOn);
+	me.el.innerHTML = '';
 	var chain = [];
 	for(var i=0; i<me.crumbs.length; i++) {
 		var c = me.crumbs[i];
 		chain.push(c);
 		if ( c=='' ) c='/';
-		var tpl = jFresh.fn.Template.energize( this.opts.itemTpl, this.el );
-		(tpl.matches(this.opts.itemText) ? tpl : tpl.querySelector(this.opts.itemText)).innerHTML = c;
+		var tpl = jFresh.fn.Template.energize( me.opts.itemTpl, me.el );
+		(tpl.matches(me.opts.itemText) ? tpl : tpl.querySelector(me.opts.itemText)).innerHTML = c;
 		tpl.classList.add('NavCrumbs-item');
 		tpl.setAttribute('data-uid', chain.join(me.opts.splitOn)||'/' );
 	}
-	//~ me.element.children().last().addClass('selected');
-
-
+	me.el.lastChild.classList.add('selected');
 };
 
 </script>

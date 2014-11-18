@@ -80,12 +80,20 @@ extend: function() {
 			var elements = el.querySelectorAll('[fn]');
 			if ( el.hasAttribute('fn') ) energizeEl(el);
 //~ console.log('Energizing children', elements, el);
-			Array.prototype.forEach.call(elements, energizeEl, this);
+			for(var z=0; z<elements.length; z++) energizeEl( elements[z] );
 			
 			el.fireEvent('ready');
 	},
 	
 	init: function(tpl, parent) {
+		//~ var mousewheelevt = (/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel" //FF doesn't recognize mousewheel as of FF3.x
+		//~ document.addEventListener(mousewheelevt, function(ev) {
+			//~ if ( ev.ctrlKey ) {
+				//~ ev.preventDefault();
+				//~ ev.stopPropagation();
+				//~ return false;
+			//~ }
+		//~ });
 		
 		//notify tethered elements when a dom node is removed
 		document.addEventListener('DOMNodeRemoved', function(ev) {
@@ -118,6 +126,17 @@ extend: function() {
 	onBeforeUnload: function(fn) {
 		jFresh._onBeforeUnloadChain.push(fn);
 	},
+	
+	uuid: function() {
+		var d = new Date().getTime();
+		var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+				var r = (d + Math.random()*16)%16 | 0;
+				d = Math.floor(d/16);
+				return (c=='x' ? r : (r&0x7|0x8)).toString(16);
+		});
+		return uuid;
+	},
+
 };
 
 jFresh.init();

@@ -9,7 +9,7 @@
 
 <template id="jFresh.Demo">
 
-	<div fn="Template Demo" Template-id="jFresh.FileExplorer"></div>
+	<div fn="Template Demo" Template-id="jFresh.DocViewer"></div>
 
 	<!--
 	<table fn="Table FixedHeaderTable Demo">
@@ -105,8 +105,8 @@ jFresh.fn.Demo = function(el,args) {
 	//~ }, true);
 	
 	setTimeout(function() {
-	document.getElementsByClassName('FileExplorer')[0].fileExplorer.val('/home/'+localStorage.user);
-	}, 500);
+	document.getElementsByClassName('DocViewer')[0].docViewer.launch( 'https://192.168.0.13/file/home/georges/Books/01%20-%20WarCraft%20-%20Day%20Of%20The%20Dragon.pdf' );
+	}, 1000);
 	//~ el.table.addRow(['fn', '123b', '2014', '2013', 'foobar', 'xrwer']);
 };
 

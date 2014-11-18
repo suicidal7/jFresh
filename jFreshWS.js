@@ -31,7 +31,7 @@ fs.glob = function(path, _opts) {
 		files: true,
 		hidden: false,
 	}, _opts);
-	
+console.log('fs.glob', path, _opts);
 	var st, f,
 		regExp = opts.filter=='*' || opts.filter=='' ? false : new RegExp('('+opts.filter.replace(/;/g,'|').replace(/\./g,'\\.').replace(/\*/g,'.*')+')$');
 		files = fs.readdirSync(path)
@@ -43,7 +43,7 @@ fs.glob = function(path, _opts) {
 	var dtl = function() { 
 		//we need stat!?
 		if ( opts.details || !opts.folders || !opts.files ) {
-			var stat = fs.statSync(path+'/'+f);
+			var stat = fs.lstatSync(path+'/'+f);
 			if ( !opts.folders && stat.isDirectory() ) return true;
 			if ( !opts.files && stat.isFile() ) return true;
 		}
@@ -87,9 +87,6 @@ process.on('message', function(m, skt) {
 		break;
 	case 'term-resize':
 		if (term) term.resize(m.d.cols, m.d.rows);
-		break;
-	case 'glob':
-		process.send({uid: m.uid, o:'glob', d: fs.glob.apply(fs, m.d)});
 		break;
 	case 'js':
 		// m.d  => [ pkg.fn, arg1, arg2, arg3,... ]
