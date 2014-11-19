@@ -198,6 +198,14 @@
 	height: 100% !important;
 }
 
+.wm-window.snapped {
+	position: absolute;
+	top: 0 !important;
+	bottom: 0 !important;
+	height: auto !important;
+	width: 50% !important;
+}
+
 @-webkit-keyframes tada { 
     0% {-webkit-transform: scale(1);} 
     10%, 20% {-webkit-transform: scale(0.9) rotate(-3deg);} 
@@ -404,8 +412,10 @@ jFresh.fn.Window.prototype.minimize = function(args) {
 jFresh.fn.Window.prototype.maximize = function(win) {
 	var win = this.el;
 	
+console.log('window max EL', win);
+
 	win.animateClass('maximizing');
-	
+console.log('window max', win.__maximizeWindow);
 	if ( win.__maximizeWindow ) {
 		win.classList.remove('maximized');
 		win.style.left = win.__maximizeWindow.left;
@@ -436,6 +446,24 @@ jFresh.fn.Window.prototype.close = function() {
 		win.remove();
 	});
 };
+
+jFresh.fn.Window.prototype.snap = function(dir) {
+	var win = this.el;
+	
+	win.animateClass('maximizing');
+	if ( win.__snapped && win.__snapped == dir ) {
+		delete win.__snapped;
+		win.classList.remove('snapped');
+	}
+	else {
+		win.__snapped = 1;
+		win.classList.add('snapped');
+		win.style['left']='auto';
+		win.style['right']='auto';
+		win.style[dir] = 0;
+	}
+};
+
 
 
 </script>

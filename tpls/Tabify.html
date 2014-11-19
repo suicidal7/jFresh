@@ -39,15 +39,6 @@ jFresh.fn.Tabify = function(el, opts) {
 	me.el= el;
 	me.opts= opts;
 	
-	me.uuid = 'TID'+jFresh.uuid();
-	me.el.setAttribute('id', me.uuid);
-	//create our style sheet ^^
-	me.sheet = document.createElement('style');
-	var style = window.getComputedStyle(el);
-	me.currWidth = parseInt(style.width);
-	me.sheet.innerHTML='#'+me.uuid+'>* { width: '+style.width+'; } ';
-	document.body.appendChild(me.sheet);
-	
 	//wrap up element!
 	me.wrapper = document.createElement('article');
 	me.wrapper.classList.add('Tabify-wrapper');
@@ -57,22 +48,12 @@ jFresh.fn.Tabify = function(el, opts) {
 	me.wrapper.appendChild(me.tabs)
 	me.wrapper.appendChild(me.el);
 	
-	var onResize = function() {
-		var style = window.getComputedStyle(me.wrapper);
-		me.currWidth = parseInt(style.width);
-console.log('resize!', me.currWidth);
-		me.sheet.innerHTML='#'+me.uuid+'>* { width: '+style.width+' !important; } ';
-	};
-	window.addResizeListener(me.wrapper, onResize);
-	onResize();
-	
 	//create the tabs
 	for(var i=0; i<me.el.children.length; i++) {
 		me.addTab( me.el.children[i] );
 	}
 	var sel = me.el.getElementsByClassName('selected')[0];
 	if ( !sel || sel.parentNode!==me.el ) sel = me.el.children[0];
-console.log('initial sel', sel, sel.index(), sel.parentNode.children);
 	if ( sel ) {
 		me.setActive( me.tabs.children[sel.index()] );
 	}
@@ -82,7 +63,6 @@ console.log('initial sel', sel, sel.index(), sel.parentNode.children);
 	me.tabs.addEventListener('click', function(ev) {
 		var t = ev.target;
 		while( t.parentNode!==me.tabs ) t = t.parentNode;
-		//~ var uid = t.getAttribute('href').substr(1);
 		
 		me.setActive(t);
 		
@@ -98,7 +78,7 @@ jFresh.fn.Tabify.defaults = {
 jFresh.fn.Tabify.prototype = {
 	addTab: function(el) {
 		var me = this;
-		//~ el.hide();
+		el.hide();
 		//todo: make this a template?
 		var lnk = document.createElement('a');
 		lnk.setAttribute('href', '#'+(el.getAttribute('tab-uid')||jFresh.uuid()));
@@ -124,12 +104,11 @@ console.log('setActiveTab', tabEl);
 		if ( me._activeTab === tabEl ) return;
 		if (me._activeTab) {
 			me._activeTab.classList.remove('selected');
-			//~ me.el.children[ me._activeTab.index() ].hide();
+			me.el.children[ me._activeTab.index() ].hide();
 		}
 		
 		tabEl.classList.add('selected');
-		bdy.scrollTo();
-		//~ bdy.show();
+		bdy.show();
 		
 		me._activeTab = tabEl;
 	},

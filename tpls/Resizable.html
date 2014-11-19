@@ -88,6 +88,13 @@ jFresh.fn.Resizable.setupHooks = function() {
 						width: parseInt(style.width), height: parseInt(style.height),
 						left: parseInt(style.left), top: parseInt(style.top) 
 					};
+					
+					resizeEl.style.left = style.left;
+					resizeEl.style.top = style.top;
+					resizeEl.style.width = style.width;
+					resizeEl.style.height = style.height;
+					if ( resizeEl.classList.contains('snapped') ) resizeEl.classList.remove('snapped')
+					
 					me.__iframes = document.getElementsByTagName('iframe');
 					for(var i=0; i<me.__iframes.length; i++) {
 						me.__iframes[i].contentWindow.addEventListener('mouseup', events.mouseup);

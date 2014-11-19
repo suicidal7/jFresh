@@ -70,7 +70,14 @@ jFresh.fn.WindowManager = function(workspace, opts) {
 	
 	}, true);  //forward chain catching, so we prevent header moving clicks when we click buttons!
 	
-	this.workspace.addEventListener('jFresh.Window.close', function(ev, data) {
+	this.workspace.addEventListener('Moveable.resize', function(ev) {
+		if ( !ev.detail ) return;
+		console.log('Moveable.resize', ev.detail);
+		if ( ev.detail == 'max' ) ev.target.window.maximize();
+		else ev.target.window.snap( ev.detail );
+	}, true);
+	
+	this.workspace.addEventListener('jFresh.Window.close', function(ev) {
 		console.log('close', ev.detail);
 		var w = ev.detail,
 			idx = me.windows.chain.indexOf(w);
