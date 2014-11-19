@@ -188,7 +188,7 @@
 	--opacity: 0;
 }
 
-.wm-window.maximized {
+.wm-window.maximized, .wm-window.maximized.snapped {
 	position: absolute;
 	top: 0 !important;
 	left: 0 !important;
@@ -452,15 +452,24 @@ jFresh.fn.Window.prototype.snap = function(dir) {
 	
 	win.animateClass('maximizing');
 	if ( win.__snapped && win.__snapped == dir ) {
+		win.style.left = win.__snappedLR.left;
+		win.style.right = win.__snappedLR.right;
 		delete win.__snapped;
+		delete win.__snappedLR;
 		win.classList.remove('snapped');
 	}
 	else {
-		win.__snapped = 1;
+		win.__snapped = dir;
 		win.classList.add('snapped');
-		win.style['left']='auto';
-		win.style['right']='auto';
-		win.style[dir] = 0;
+		win.__snappedLR = {left: win.style.left, right: win.style.right};
+		if ( dir=='left' ) {
+			win.style.left = 0;
+		}
+		else {
+			var st = window.getComputedStyle(win.parentNode);
+console.log('setting left', parseInt(st.width)/2);
+			win.style.left = (parseInt(st.width)/2) + 'px';
+		}
 	}
 };
 
