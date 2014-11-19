@@ -232,7 +232,7 @@
 </style>
 
 <template id="jFresh.Window">
-<div class="wm-window" fn="Window Resizable">
+<div class="wm-window" fn="Window Resizable" tabindex="1">
 	<header>
 		<span class="icon i24"></span>
 		<h1></h1>
@@ -361,9 +361,24 @@ jFresh.fn.Window.prototype = {
 jFresh.fn.Window.prototype.minimize = function(args) {
 	var opts = jFresh.extend(true,{
 		'towards': this.opts.minimizeTo, //of workspace - or give DOM element
+		'restore': false, //try to restore window state first (maximized/snapped)
 		}, args);
 //~ console.log('going towards', opts.towards);
 	var win = this.el;
+	
+	
+	if ( opts.restore ) {
+		if ( win.classList.contains('maximized') ) {
+			return win.window.maximize();
+		}
+		else if ( win.classList.contains('snapped') ) {
+			win.animateClass('minimizing');
+			win.classList.remove('snapped');
+			return;
+		}
+	}
+
+	
 	//~ win.classList.remove('minimized');
 	win.animateClass('minimizing', 'minimized');
 	
@@ -409,7 +424,7 @@ jFresh.fn.Window.prototype.minimize = function(args) {
 	
 };
 
-jFresh.fn.Window.prototype.maximize = function(win) {
+jFresh.fn.Window.prototype.maximize = function(forced) {
 	var win = this.el;
 	
 console.log('window max EL', win);
@@ -417,6 +432,7 @@ console.log('window max EL', win);
 	win.animateClass('maximizing');
 console.log('window max', win.__maximizeWindow);
 	if ( win.__maximizeWindow ) {
+		if ( forced ) return;
 		win.classList.remove('maximized');
 		win.style.left = win.__maximizeWindow.left;
 		win.style.top = win.__maximizeWindow.top;

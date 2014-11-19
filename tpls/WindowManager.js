@@ -70,6 +70,9 @@ jFresh.fn.WindowManager = function(workspace, opts) {
 	
 	}, true);  //forward chain catching, so we prevent header moving clicks when we click buttons!
 	
+	me.hookGlobalListeners();
+	window.currentWindowManager = this;
+	
 	this.workspace.addEventListener('Moveable.resize', function(ev) {
 		if ( !ev.detail ) return;
 		console.log('Moveable.resize', ev.detail);
@@ -92,6 +95,34 @@ jFresh.fn.WindowManager = function(workspace, opts) {
 	//~ });
 
 	}, true);
+
+
+	var keyNames = {3: "Enter", 8: "Backspace", 9: "Tab", 13: "Enter", 16: "Shift", 17: "Ctrl", 18: "Alt",
+									19: "Pause", 20: "CapsLock", 27: "Esc", 32: "Space", 33: "PageUp", 34: "PageDown", 35: "End",
+									36: "Home", 37: "Left", 38: "Up", 39: "Right", 40: "Down", 44: "PrintScrn", 45: "Insert",
+									46: "Delete", 59: ";", 61: "=", 91: "Mod", 92: "Mod", 93: "Mod", 107: "=", 109: "-", 127: "Delete",
+									173: "-", 186: ";", 187: "=", 188: ",", 189: "-", 190: ".", 191: "/", 192: "`", 219: "[", 220: "\\",
+									221: "]", 222: "'", 63232: "Up", 63233: "Down", 63234: "Left", 63235: "Right", 63272: "Delete",
+									63273: "Home", 63275: "End", 63276: "PageUp", 63277: "PageDown", 63302: "Insert"};
+	me.keyNames = keyNames;
+	me.keyBinds = {};
+	(function() {
+		// Number keys
+		for (var i = 0; i < 10; i++) keyNames[i + 48] = keyNames[i + 96] = String(i);
+		// Alphabetic keys
+		for (var i = 65; i <= 90; i++) keyNames[i] = String.fromCharCode(i);
+		// Function keys
+		for (var i = 1; i <= 12; i++) keyNames[i + 111] = keyNames[i + 63235] = "F" + i;
+	})();
+	
+	me.keyChain = [];
+	
+	
+	me.bindKey('F5', function(ev) { return false; });
+	me.bindKey('Ctrl+Alt+Left', function(ev) { var win = me.getActive(); win.window.snap('left'); });
+	me.bindKey('Ctrl+Alt+Right', function(ev) { var win = me.getActive(); win.window.snap('right'); });
+	me.bindKey('Ctrl+Alt+Up', function(ev) { var win = me.getActive(); win.window.maximize(true); });
+	me.bindKey('Ctrl+Alt+Down', function(ev) { var win = me.getActive(); win.window.minimize({restore: true}); });
 };
 
 jFresh.fn.WindowManager.defaults = {
@@ -124,6 +155,10 @@ jFresh.fn.WindowManager.prototype.activateWindow = function(win) {
 	win.dispatchEvent(new CustomEvent('jFresh.Window', {detail: 'activated'}) );
 };
 
+jFresh.fn.WindowManager.prototype.getActive = function() {
+	return this.windows.tabChain[ this.windows.tabChain.length - 1 ];
+};
+
 
 jFresh.fn.WindowManager.prototype.createWindow = function(args) {
 	var win = jFresh.fn.Template.energize( this.opts.windowTpl, this.el );
@@ -134,26 +169,52 @@ jFresh.fn.WindowManager.prototype.createWindow = function(args) {
 	return win;
 };
 
-/*
-for(var k in jFresh.fn) {
-	if ( !jFresh.fn.hasOwnProperty(k) ) continue;
-	var o = jFresh.fn[k];
-	Node.prototype.
-}
-*/
+jFresh.fn.WindowManager.prototype.hookGlobalListeners = function() {
+	if ( window.__WindowManagerHooked__ ) return;
+	window.__WindowManagerHooked__ = true;
+	
+	window.addEventListener('keydown', function(ev) {
+		if ( window.currentWindowManager && window.currentWindowManager.onKeyDown.call(window.currentWindowManager, ev)===false ) {
+			ev.preventDefault();
+			ev.stopPropagation();
+			return false;
+		}
+	},true);
+	
+},
 
-//may not implement!?
-/*
-Node.prototype.windowManager = function(opts) {
+jFresh.fn.WindowManager.prototype.bindKey = function( binding, cb, contain ) {
+	var me=this;
+	if ( !me.keyBinds.hasOwnProperty(binding) ) me.keyBinds[binding] = [];
+	me.keyBinds[binding].push([cb, contain]);
+};
+
+jFresh.fn.WindowManager.prototype.onKeyDown = function( ev ) {
 	var me = this;
 	
-	if ( me.windowManager ) {
-console.log('dafak', me);
-		return arguments.length ? me.windowManager.exec.apply(me.windowManager, arguments) : me.windowManager;
+	var key = me.keyNames[ev.keyCode];
+	var binding = [];
+	if (ev.ctrlKey) binding.push('Ctrl');
+	if (ev.altKey) binding.push('Alt');
+	if (ev.shiftKey) binding.push('Shift');
+	if (ev.metaKey) binding.push('Meta');
+	if ( binding.indexOf(key)<0 ) binding.push(key);
+	binding = binding.join('+');
+	
+	if ( me.keyBinds.hasOwnProperty(binding) ) {
+		var bs = me.keyBinds[binding];
+		var isCancel;
+		for(var i=0; i<bs.length && (!bs[i][1] || bs[i][1].contains(ev.target) ) && (isCancel=bs[i][0](ev))!==false; i++);
+		if ( isCancel===false ) {
+			ev.preventDefault();
+			ev.stopPropagation();
+			return false;
+		}
 	}
-	//~ me.windowManager = new jFresh.fn.WindowManager(this, opts);
-console.log('created new windowManager', me);
-	return me.windowManager;
 };
-*/
+
+//helpers?!
+Node.prototype.$WM = function() { return this.closest('.WindowManager') };
+$WM = function() { return window.currentWindowManager; };
+
 

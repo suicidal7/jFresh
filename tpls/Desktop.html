@@ -284,11 +284,12 @@ tr:nth-child(2n) {
 			background-color: #F7F7F7';
 }
 .selected {
-			border-bottom: 1px solid #EBEAA7 !important;
-			box-shadow: 0px -1px #EBEAA7 !important;
-			padding-top: 0px;
-			background: none repeat scroll 0% 0% #FFFEB7 !important;
-			color: #2B2B2B !important;
+	border: 0 !important;
+	border-bottom: 1px solid #EBEAA7 !important;
+	box-shadow: 0px -1px #EBEAA7 !important;
+	padding-top: 0px;
+	background: none repeat scroll 0% 0% #FFFEB7 !important;
+	color: #2B2B2B !important;
 }
 	
 nav .selected {
@@ -306,6 +307,47 @@ nav .selected {
 	z-index: 10;
 }
 
+
+
+
+a {
+	background-color: #2489CC;
+	color: #FFFFFF;
+	text-decoration: none;
+	margin-left: 1px;
+	border-left: medium none;
+	box-sizing: border-box;
+	background: none repeat scroll 0% 0% #3498DB;
+	color: #FFF;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #3498DB #3498DB #268FD5;
+	-moz-border-top-colors: none;
+	-moz-border-right-colors: none;
+	-moz-border-bottom-colors: none;
+	-moz-border-left-colors: none;
+	border-image: none;
+	outline: 0px none;
+	cursor: pointer;
+	padding: 0px;
+	white-space: nowrap;
+	padding: 5px 20px;
+	line-height: 33px;
+	height: 33px;
+}
+
+a:active {
+	background-color: #2489CC;
+	box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.125) inset;
+}
+a:hover {
+	background-color: #268FD5;
+}
+a:focus {
+	background-color: #219552;
+}
+
+
 </style>
 
 <template id="jFresh.Icon">
@@ -313,7 +355,7 @@ nav .selected {
 </template>
 
 <template id="jFresh.Desktop">
-	<div class="desktop-wrapper" fn="SocketIO RotateWallpaper" fn-disabled="MakeItRain">
+	<div class="desktop-wrapper" fn="SocketIO Desktop RotateWallpaper" fn-disabled="MakeItRain" tabindex="1">
 		<div class="workspace" fn="WindowManager AppLauncher">
 		</div>
 		<div class="taskbar" fn="Taskbar" Taskbar-manager="">
@@ -350,6 +392,34 @@ nav .selected {
 <script type="text/javascript">
 
 
+
+jFresh.fn.Desktop = function(el, opts) {
+	var me = this;
+	me.el = el;
+	me.opts = opts;
+	me.el.focus();
+
+	var onReady = function() {
+		me.wm = me.el.querySelector('.WindowManager').windowManager;
+		me.wm.bindKey('Alt', function(ev) {
+			me.el.querySelector('.taskbar>.apps-list').click();
+		});
+		me.el.removeEventListener('ready', onReady);
+	};
+	me.el.addEventListener('ready', onReady);
+	
+	/*
+	var lastKeyDown;
+	me.el.addEventListener('keydown', function(ev) {
+		lastKeyDown = ev.keyCode;
+	});
+	me.el.addEventListener('keyup', function(ev) {
+		if ( ev.keyCode==18 && (!lastKeyDown || lastKeyDown==18) ) {
+			me.el.querySelector('.taskbar>.apps-list').click();
+		}
+		//~ console.log('KEYPRESS', ev.keyCode);
+	}, true);*/
+};
 
 jFresh.fn.xLogin = function(el, opts) {
 	var me = this;

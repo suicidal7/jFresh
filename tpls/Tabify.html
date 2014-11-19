@@ -12,6 +12,16 @@
 	flex: 0 1 auto;
 }
 
+.Tabify-wrapper>header>* {
+	text-decoration: none;
+	color: inherit;
+	padding: 5px;
+	line-height: 28px;
+	vertical-align: center;
+	border-top-left-radius: 20px;
+	border-top-right-radius: 5px;
+}
+
 .Tabify-wrapper>.Tabify {
 	flex: 1 1 auto;
 	align-self: stretch;
@@ -19,15 +29,12 @@
 	
 	overflow: hidden;
 	white-space: nowrap;
-	display: block;
-	
-	transition: scrollLeft 1s ease-in;
+	display: flex;
 }
 
 .Tabify-wrapper [tab-uid] {
-	background-color: red;
-	display: inline-block;
-	height: 100%;
+	flex: 1 1 auto;
+	align-self: stretch;
 }
 
 

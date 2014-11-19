@@ -24,6 +24,7 @@ jFresh.fn.RotateWallpaper = function(el, opts) {
 
 	var rotate =function() {
 		me.el.style.backgroundImage="url('imgs/wallpapers/"+(me.wallPapers[me.idx++])+"')";
+		if ( me.idx>= me.wallPapers.length ) me.idx = 0;
 	};
 
 	
