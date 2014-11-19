@@ -68,10 +68,13 @@ jFresh.fn.Resizable.defaults = {
 //sets up 1 event listener for all our resizable targets
 //instead of 1 for each...
 jFresh.fn.Resizable.setupHooks = function() {
+	jFresh.__Resizable__ = true;
 	var resizing = false;
 	var resizeEl;
 	var start = {};
 	var handleDirections = [ 'n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se' ];
+	var me = this;
+	
 	var events = {
 		mousedown: function(ev) {
 			if ( ev.target.classList.contains('Resizable-handle') ) {
@@ -85,8 +88,13 @@ jFresh.fn.Resizable.setupHooks = function() {
 						width: parseInt(style.width), height: parseInt(style.height),
 						left: parseInt(style.left), top: parseInt(style.top) 
 					};
-					document.addEventListener('mousemove', events.mousemove );
-					document.addEventListener('mouseup', events.mouseup );
+					me.__iframes = document.getElementsByTagName('iframe');
+					for(var i=0; i<me.__iframes.length; i++) {
+						me.__iframes[i].contentWindow.addEventListener('mouseup', events.mouseup);
+						me.__iframes[i].contentWindow.addEventListener('mousemove', events.mousemove);
+					}
+					window.addEventListener('mouseup', events.mouseup);
+					window.addEventListener('mousemove', events.mousemove);
 				}
 				ev.preventDefault();
 				ev.stopPropagation();
@@ -95,11 +103,17 @@ jFresh.fn.Resizable.setupHooks = function() {
 		},
 		mouseup: function(ev) {
 			resizing = false;
-			document.removeEventListener('mousemove', events.mousemove );
-			document.removeEventListener('mouseup', events.mouseup );
+			window.removeEventListener('mouseup', events.mouseup);
+			window.removeEventListener('mousemove', events.mousemove);
+console.log('unhooking iframes', me.__iframes);
+			for(var i=0; i<me.__iframes.length; i++) {
+				me.__iframes[i].contentWindow.removeEventListener('mouseup', events.mouseup);
+				me.__iframes[i].contentWindow.removeEventListener('mousemove', events.mousemove);
+			}
 		},
 		mousemove: function(ev) {
-			
+console.log('mousemove?!!!');
+			if ( !resizing ) return;
 			var style = window.getComputedStyle(resizeEl),
 				apply = {},
 				w = ev.screenX - start.x,

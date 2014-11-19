@@ -120,7 +120,7 @@ table,ul {
 	-background: url('imgs/bg3.jpg') no-repeat fixed center center / cover transparent;
 	background: url('imgs/bg3.jpg') top left no-repeat;
 	background-size: 100% 100%;
-
+	transition: background 5s ease-in;
 }
 .desktop-wrapper>.workspace {
 	flex: 1 1 auto;
@@ -308,7 +308,7 @@ nav .selected {
 </template>
 
 <template id="jFresh.Desktop">
-	<div class="desktop-wrapper" fn="SocketIO" fn-disabled="MakeItRain">
+	<div class="desktop-wrapper" fn="SocketIO RotateWallpaper" fn-disabled="MakeItRain">
 		<div class="workspace" fn="WindowManager AppLauncher">
 		</div>
 		<div class="taskbar" fn="Taskbar" Taskbar-manager="">
@@ -391,6 +391,9 @@ jFresh.fn.IconButton = function(el, opts) {
 	this.el.classList.add('icon');
 	this.el.classList.add('icon-button');
 };
+
+
+
 
 
 

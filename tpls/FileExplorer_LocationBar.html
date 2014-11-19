@@ -107,9 +107,12 @@ jFresh.fn.AutoComplete.prototype = {
 			this.datalistEl.innerHTML='';
 			this._requested = {};
 		}
+		
+		var newInner = '';
 		for(var i=0; i<opts.length; i++) {
-			this.datalistEl.innerHTML += '<option>'+opts[i]+'</option>';
+			newInner += '<option>'+opts[i]+'</option>';
 		}
+		this.datalistEl.innerHTML += newInner;
 		
 		if ( opts.length < 1 ) {
 			me.refreshAutoComplete.call(me, true);
@@ -231,10 +234,14 @@ jFresh.fn.FileExplorer_LocationBar.prototype = {
 		if ( !arguments.length ) return this._val;
 		
 		var me = this;
+		
+		//prevent useless refresh
+		if ( me.__v == v ) return;
+		me.__v = v;
+
 		this._val = {baseName: '', dirName: '', };
-console.log('new val', this._val);
+
 		var onStat = function(res) {
-console.log('val stat', res);
 			if ( fsTools.nodeType( res.d.mode ) == 'folder' ) {
 				me._val.dirName = v;
 				me._val.baseName = '';
@@ -270,6 +277,9 @@ console.log('val stat', res);
 		if ( stat ) onStat({d: stat});
 		else me.socketIO.send('js', [ 'fs.lstatSync', v ], onStat);
 
+	},
+	setSel: function(selectedFiles) {
+		this.textEl.value = selectedFiles;
 	},
 };
 

@@ -1,3 +1,9 @@
+Node.prototype.index = function() {
+	var e = this, i=0;
+	while( (e=e.previousElementSibling)!=null ) i++;
+	return i;
+}
+
 Node.prototype.closest = function(sel) {
 	var p = this;
 	while(!p.matches(sel) && !p.querySelector(sel) && p.parentNode && p.parentNode.matches) p = p.parentNode;
@@ -141,3 +147,34 @@ Node.prototype.position = function(args) {
 	}
 	
 }
+
+Node.prototype.scrollTo = function() {
+	var parentScrollHeight = this.parentNode.scrollHeight
+		, parentScrollWidth = this.parentNode.scrollWidth
+		, parentStyle = window.getComputedStyle(this.parentNode)
+		, parentHeight = parseInt(parentStyle.height)
+		, parentWidth = parseInt(parentStyle.width)
+		, style = window.getComputedStyle(this)
+	;
+	
+	var slide = function(x, el) {
+		var diff = (x - el.scrollLeft)/10;
+		var fn = function() {
+			el.scrollLeft = el.scrollLeft + diff;
+//~ console.log('stepping scroll', el.scrollLeft, diff, x);
+			if ( Math.abs(el.scrollLeft - x) > Math.abs(diff)*2 ) setTimeout(fn, 120);
+			else el.scrollLeft = x;
+		};
+		fn();
+		setTimeout(fn, 100);
+	};
+	
+	if ( parentScrollHeight - parentHeight > 1 ) {
+	}
+	if ( parentScrollWidth - parentWidth > 1 ) {
+		slide( this.offsetLeft, this.parentNode );
+	}
+	
+	
+	return this;
+};

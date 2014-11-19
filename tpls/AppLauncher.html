@@ -1,10 +1,26 @@
 <script type="text/javascript">
 
 jFresh.fn.AppLauncher = function(el, opts) {
+	var me  = this;
 	this.opts  = opts;
 	this.el = el;
 	this.wm = this.opts.manager ? this.el.closest(this.opts.manager) : this.el;
 	if ( this.wm ) this.wm = this.wm.windowManager;
+	
+	
+	me.socketIO = me.opts.sktEl ?  me.el.closest( me.opts.sktEl ) : me.el; //El
+	var onSktElReady =  function() {
+		me.socketIO.removeEventListener('SocketIO.ready', onSktElReady);
+		me.socketIO = me.socketIO.socketIO; //Obj
+		me.el.socketIO = me.socketIO;
+	};
+	if ( me.socketIO.socketIO ) {
+		onSktElReady();
+	}
+	else {
+		me.socketIO.addEventListener('SocketIO.ready', onSktElReady);
+	}
+
 	
 	
 	var me = this;
@@ -20,9 +36,10 @@ jFresh.fn.AppLauncher.uids = 1;
 jFresh.fn.AppLauncher.defaults = {
 	manager: null, //defaults to this.el, otherwise this.el.closest(manager)
 	appClass: 'app-icon-', //what to prepend to class added to item based on app name
+	sktEl: '.SocketIO', //this.el.closest(sktEl)
 };
 
-jFresh.fn.AppLauncher.prototype.launch = function(appId) {
+jFresh.fn.AppLauncher.prototype.launch = function(appId, appArgs) {
 	//appId is basically a templateId
 	var win = this.wm.createWindow();
 //~ console.log('window', win, win.window);
@@ -34,7 +51,75 @@ jFresh.fn.AppLauncher.prototype.launch = function(appId) {
 	};
 	win.window.icon = this.opts.appClass+title;
 	win.window.title = win.window.__app.title;
+	
 	win.window.content = appId; //content expects it
+	var app = win.window.content;
+	var otitle = title.lowerFirst();
+	
+	if ( app.hasOwnProperty(otitle) && app[otitle].start )
+		app[otitle].start(appArgs);
+		
+	win.window.el.setAttribute('appId', appId);
+	//find last open app of this type and move window location near it
+	var otherWindows = this.wm.workspace.children;
+	var found, bounds = window.getComputedStyle(this.wm.workspace);
+	
+	for(var i = otherWindows.length-1; i>-1; i--) {
+		if ( otherWindows[i]!=win.window.el && otherWindows[i].getAttribute('appId') == appId ) {
+			found = window.getComputedStyle( otherWindows[i] );
+			var x = parseInt(found.left)+40
+				, y = parseInt(found.top)+40
+				, w = parseInt(found.width)
+				, h = parseInt(found.height)
+				;
+			
+			//if new coords fall out of bounds, go back to top/left corner
+			if ( (x + w > parseInt( bounds.width ) ) || ( y + h > parseInt( bounds.height ) ) ) {
+				x = y = 40;
+			}
+			
+			win.window.el.style.width = w+'px';
+			win.window.el.style.height = h+'px';
+			win.window.el.style.top = x+'px';
+			win.window.el.style.left = y+'px';
+			break;
+		}
+	}
+	
+};
+
+jFresh.fn.AppLauncher.prototype.launchFile = function(file, stat) {
+	var me = this;
+	
+		var onStat = function(res) {
+			stat = res.d;
+			if ( !stat ) return;
+			
+			var mtype = '', gtype='';
+			if ( fsTools.nodeType( stat.mode ) == 'folder' ) { //run app associated with folders (FileExplorer)
+			}
+			else {
+				mtype = stat.mimetype;
+				gtype = mtype.split('/').shift();
+console.log('Applaunch ftype', mtype);
+			}
+			
+			var app;
+			if ( (app = jFresh.typeAssociations[mtype]) || (app = jFresh.typeAssociations[ gtype ]) ) {
+				console.log('Launching associated app: ', mtype, app);
+				me.launch(app, file);
+			}
+			else {
+				console.log('Failed to find an associated app with:', mtype);
+			}
+			
+		};
+		
+		//first lstat the target to figure out if its a folder or what...
+		if ( stat ) onStat({d: stat});
+		else me.socketIO.send('js', [ 'fs.istat', file ], onStat);
+
+
 };
 
 </script>

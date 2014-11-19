@@ -19,11 +19,17 @@ Node.prototype.moveable = function(options) {
 			var style = window.getComputedStyle(drag,null);
 			dragInfo.width = drag.offsetWidth + parseInt(style.marginLeft) + parseInt(style.marginRight);
 			dragInfo.height = drag.offsetHeight + parseInt(style.marginTop) + parseInt(style.marginBottom);
-			dragInfo.x = drag.offsetLeft + dragInfo.width - ev.pageX;
-			dragInfo.y = drag.offsetTop + dragInfo.height - ev.pageY;
+			dragInfo.x = drag.offsetLeft + dragInfo.width - ev.screenX;
+			dragInfo.y = drag.offsetTop + dragInfo.height - ev.screenY;
 			
-			document.addEventListener('mouseup', events.mouseup);
-			document.addEventListener('mousemove', events.mousemove);
+			//~ drag.requestPointerLock();
+			me.__iframes = document.getElementsByTagName('iframe');
+			for(var i=0; i<me.__iframes.length; i++) {
+				me.__iframes[i].contentWindow.addEventListener('mouseup', events.mouseup);
+				me.__iframes[i].contentWindow.addEventListener('mousemove', events.mousemove);
+			}
+			window.addEventListener('mouseup', events.mouseup);
+			window.addEventListener('mousemove', events.mousemove);
 
 			if ( opts.container ) {
 				var dStyle = window.getComputedStyle(drag,null);
@@ -43,9 +49,16 @@ Node.prototype.moveable = function(options) {
 		},
 		mouseup: function(ev) {
 //~ console.log('moveable mouseup');
+			//~ drag.exitPointerLock();
 			drag = false;
-			document.removeEventListener('mouseup', events.mouseup);
-			document.removeEventListener('mousemove', events.mousemove);
+			window.removeEventListener('mouseup', events.mouseup);
+			window.removeEventListener('mousemove', events.mousemove);
+			
+			for(var i=0; i<me.__iframes.length; i++) {
+				me.__iframes[i].contentWindow.removeEventListener('mouseup', events.mouseup);
+				me.__iframes[i].contentWindow.removeEventListener('mousemove', events.mousemove);
+			}
+
 			
 			if ( opts.container ) { //make sure it stays inside bounds
 				var style = window.getComputedStyle(me, null);
@@ -62,8 +75,8 @@ Node.prototype.moveable = function(options) {
 			}
 		},
 		mousemove: function(ev) {
-			var y = (ev.pageY + dragInfo.y - dragInfo.height),
-				x = (ev.pageX + dragInfo.x - dragInfo.width);
+			var y = (ev.screenY + dragInfo.y - dragInfo.height),
+				x = (ev.screenX + dragInfo.x - dragInfo.width);
 			
 			if ( opts.container ) {
 				if ( x < dragInfo.bounds.left ) x = dragInfo.bounds.left;
@@ -74,6 +87,7 @@ Node.prototype.moveable = function(options) {
 			
 			drag.style.left = x + 'px';
 			drag.style.top = y + 'px';
+			ev.stopPropagation();
 			ev.preventDefault();
 			return false;
 		},

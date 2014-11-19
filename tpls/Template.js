@@ -14,6 +14,7 @@ jFresh.fn.Template.defaults = {
 
 //create and energize a template
 jFresh.fn.Template.energize = function(tpl, el) {
+	if ( !el ) el = jFresh._dummyContainer;
 	var tplEl = jFresh.fn.Template.prototype.loadTemplate( tpl, el);
 	if ( !tplEl ) return;
 	//~ for(var i=0; i<tplEl.length; i++) {

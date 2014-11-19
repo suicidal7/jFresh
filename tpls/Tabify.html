@@ -1,0 +1,139 @@
+<style>
+.Tabify-wrapper {
+	flex: 1 1 auto;
+	align-self: stretch;
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: stretch;
+	align-content: stretch;
+}
+
+.Tabify-wrapper>header {
+	flex: 0 1 auto;
+}
+
+.Tabify-wrapper>.Tabify {
+	flex: 1 1 auto;
+	align-self: stretch;
+	background-color: rbga(255,0,0,0.5);
+	
+	overflow: hidden;
+	white-space: nowrap;
+	display: block;
+	
+	transition: scrollLeft 1s ease-in;
+}
+
+.Tabify-wrapper [tab-uid] {
+	background-color: red;
+	display: inline-block;
+	height: 100%;
+}
+
+
+</style>
+
+<script type="text/javascript">
+jFresh.fn.Tabify = function(el, opts) {
+	var me = this;
+	me.el= el;
+	me.opts= opts;
+	
+	me.uuid = 'TID'+jFresh.uuid();
+	me.el.setAttribute('id', me.uuid);
+	//create our style sheet ^^
+	me.sheet = document.createElement('style');
+	var style = window.getComputedStyle(el);
+	me.currWidth = parseInt(style.width);
+	me.sheet.innerHTML='#'+me.uuid+'>* { width: '+style.width+'; } ';
+	document.body.appendChild(me.sheet);
+	
+	//wrap up element!
+	me.wrapper = document.createElement('article');
+	me.wrapper.classList.add('Tabify-wrapper');
+	el.parentNode.insertBefore( me.wrapper, el );
+	
+	me.tabs = document.createElement('header');
+	me.wrapper.appendChild(me.tabs)
+	me.wrapper.appendChild(me.el);
+	
+	var onResize = function() {
+		var style = window.getComputedStyle(me.wrapper);
+		me.currWidth = parseInt(style.width);
+console.log('resize!', me.currWidth);
+		me.sheet.innerHTML='#'+me.uuid+'>* { width: '+style.width+' !important; } ';
+	};
+	window.addResizeListener(me.wrapper, onResize);
+	onResize();
+	
+	//create the tabs
+	for(var i=0; i<me.el.children.length; i++) {
+		me.addTab( me.el.children[i] );
+	}
+	var sel = me.el.getElementsByClassName('selected')[0];
+	if ( !sel || sel.parentNode!==me.el ) sel = me.el.children[0];
+console.log('initial sel', sel, sel.index(), sel.parentNode.children);
+	if ( sel ) {
+		me.setActive( me.tabs.children[sel.index()] );
+	}
+	
+	
+	//setup click handlers
+	me.tabs.addEventListener('click', function(ev) {
+		var t = ev.target;
+		while( t.parentNode!==me.tabs ) t = t.parentNode;
+		//~ var uid = t.getAttribute('href').substr(1);
+		
+		me.setActive(t);
+		
+		ev.stopPropagation();
+		ev.preventDefault();
+		return false;
+	}, true);
+};
+
+jFresh.fn.Tabify.defaults = {
+};
+
+jFresh.fn.Tabify.prototype = {
+	addTab: function(el) {
+		var me = this;
+		//~ el.hide();
+		//todo: make this a template?
+		var lnk = document.createElement('a');
+		lnk.setAttribute('href', '#'+(el.getAttribute('tab-uid')||jFresh.uuid()));
+		lnk.innerHTML = el.getAttribute('tab-title') || "Tab";
+		me.tabs.appendChild( lnk );
+	},
+	setActive: function(tabEl) {
+		var me = this;
+		var uid;
+console.log('setActiveTab', tabEl);
+		if ( typeof(tabEl)=='string') {
+			uid = tabEl;
+			tabEl = me.tabs.querySelector('[href="#'+tabEl+'"]');
+		}
+		else {
+			uid = tabEl.getAttribute('href').substr(1);
+		}
+		if ( !tabEl ) return;
+		
+		var idx=0;
+		var bdy = me.el.children[tabEl.index()];
+		
+		if ( me._activeTab === tabEl ) return;
+		if (me._activeTab) {
+			me._activeTab.classList.remove('selected');
+			//~ me.el.children[ me._activeTab.index() ].hide();
+		}
+		
+		tabEl.classList.add('selected');
+		bdy.scrollTo();
+		//~ bdy.show();
+		
+		me._activeTab = tabEl;
+	},
+};
+
+
+</script>

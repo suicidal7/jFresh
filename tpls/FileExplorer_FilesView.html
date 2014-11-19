@@ -194,27 +194,12 @@ jFresh.fn.FileExplorer_FilesView = function(el, opts) {
 			me.val( path, file );
 			me.el.fireEvent('change', [path, file]);
 		}
+		else {
+			var path = fsTools.cleanPath(me._val.dirName+'/'+file.name);
+			me.el.fireEvent('change', [path, file]);
+		}
 	});
 
-	
-	
-	/*setTimeout(function() {
-		var path = '/home/'+localStorage.user;
-		skt.send('js', [ 'fs.glob', path, {filter: '*', details: true} ], function(res) {
-			res.d = res.d.sort(function(a,b) {
-				if ( a.type==b.type ) {
-					if ( a.name < b.name ) return -1;
-					return 1;
-				}
-				else {
-					if ( a.type=='folder' ) return -1;
-					return 1;
-				}
-			});
-			
-			for(var i=0; i<res.d.length; i++) { me.addFile(path, res.d[i]) };
-		});
-	}, 500);*/
 };
 
 jFresh.fn.FileExplorer_FilesView.defaults = {
@@ -327,10 +312,15 @@ jFresh.fn.FileExplorer_FilesView.prototype = {
 
 	val: function(v, stat) {
 		var me = this;
-console.log('FilesView.val', v, stat);
+//~ console.log('FilesView.val', v, stat);
 		//getter
-		if ( !arguments.length ) return; //todo: 
+		if ( !arguments.length ) return me.el.table.selected; //todo: ?
 		
+		
+		//prevent useless refresh
+		if ( me.__v == v ) return;
+		me.__v = v;
+
 		//setter
 		me.el.table.tbody.innerHTML='LOADING...';
 		if ( typeof(v)=='object') {
@@ -354,15 +344,55 @@ console.log('FilesView.val', v, stat);
 					if ( !res.d ) res.d=[];
 console.log('fs.glob', path, res);
 					res.d = res.d.sort(function(a,b) {
-						if ( a.type==b.type ) {
-							if ( a.name < b.name ) return -1;
-							return 1;
+						var afolder = (a.type=='folder')
+								, bfolder = (b.type=='folder');
+						if ( afolder==bfolder ) {
+//~ console.log('cmp', a.name, b.name, a.name.localeCompare(  b.name ));
+							//~ return a.name.localeCompare(  b.name );
+							return a.name > b.name ? 1 : -1;
 						}
-						if ( a.type=='folder' ) return -1;
-						return 1;
+						return afolder ? -1 : 1;
 					});
 					
-					for(var i=0; i<res.d.length; i++) { me.addFile(path, res.d[i]) };
+					var progressiveLoad = function(res) {
+						var listenerSet;
+						var mousewheelevt = (/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel" //FF doesn't recognize mousewheel as of FF3.x
+						
+						var onScroll = function() {
+							//~ me.el.table.tbody
+	//~ console.log('onScroll', me.el.parentNode.scrollHeight - me.el.parentNode.scrollTop );
+							var stl = window.getComputedStyle(me.el.parentNode);
+							if ( (me.el.parentNode.scrollHeight - me.el.parentNode.scrollTop) - parseInt(stl.height) < 100 ) {
+								pLoad();
+							}
+						};
+						var lastStop = 0;
+	console.log('total of ', res.d.length);
+						var pLoad = function() {
+	console.log('progressiveLoad', lastStop, res.d.length);
+							var currCount=0;
+							for(var i=lastStop; i<res.d.length && currCount<50; i++) {
+								me.addFile(path, res.d[i]);
+								currCount++;
+							}
+							lastStop = i;
+							
+							if ( lastStop>=res.d.length ) {
+	console.log('progressiveLoad done!');
+								me.el.removeEventListener(mousewheelevt, onScroll);
+							}
+							else if ( !listenerSet ) {
+								listenerSet = true;
+								me.el.addEventListener(mousewheelevt, onScroll);
+							}
+						//~ for(var i=0; i<res.d.length && i < max; i++) { me.addFile(path, res.d[i]) };
+						//~ if ( 
+						//~ if ( max == 50 ) max = 10;
+						};
+						pLoad();
+					};
+					
+					progressiveLoad(res);
 				});
 			};
 			

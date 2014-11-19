@@ -84,22 +84,43 @@ jFresh.fn.FileExplorer = function(el, opts) {
 	}
 	
 	
+	
 	me.el.addEventListener('change', function(ev) {
-		if ( !ev.userData ) return;
-		ev.userData[0] = fsTools.cleanPath( ev.userData[0] );
-		if ( ev.target == me.filesView ) {
-			me.locationBar.fileExplorer_LocationBar.val(ev.userData[0], ev.userData[1]);
-			me.places.fileExplorer_Places.val(ev.userData[0]);
+		if ( !ev.userData ) {
+			//this is a file selection, we want to pass it to location_bar text bar
+			if ( me.filesView.contains( ev.target ) ) {
+				var file, sel = me.filesView.fileExplorer_FilesView.val();
+				var selectedFiles = [];
+				for(var i=0;i<sel.length; i++) {
+					file = sel[i].__file;
+					if ( file.type != 'folder' ) selectedFiles.push(file.name);
+				}
+				me.locationBar.fileExplorer_LocationBar.setSel( (selectedFiles.length > 1 ? '"'+selectedFiles.join('" "')+'"' : selectedFiles[0]) || '' );
+			}
+			return;
 		}
-		else if ( ev.target == me.locationBar || me.locationBar.contains(ev.target) ) {
-			me.locationBar.fileExplorer_LocationBar.val(ev.userData[0]);
-			me.filesView.fileExplorer_FilesView.val(ev.userData[0]);
-			me.places.fileExplorer_Places.val(ev.userData[0]);
+		var path = fsTools.cleanPath( ev.userData[0] );
+		var stat = ev.userData[1];
+		
+		var onStat = function(res) {
+			if ( fsTools.nodeType( res.d.mode ) != 'folder' ) {
+				console.log('launch',path, res.d);
+				me.launcher.appLauncher.launchFile( path, res.d );
+			}
+			else {
+				me.locationBar.fileExplorer_LocationBar.val(path, res.d);
+				me.filesView.fileExplorer_FilesView.val(path, res.d);
+				me.places.fileExplorer_Places.val(path, res.d);
+			}
+		};
+		
+		if ( ev.target == me.filesView
+					|| ev.target == me.locationBar || me.locationBar.contains(ev.target) 
+					|| ev.target == me.places ) {
+			if ( stat ) onStat({d: stat});
+			else me.socketIO.send('js', [ 'fs.lstatSync', path ], onStat);
 		}
-		else if ( ev.target == me.places ) {
-			me.locationBar.fileExplorer_LocationBar.val(ev.userData[0]);
-			me.filesView.fileExplorer_FilesView.val(ev.userData[0]);
-		}
+		
 	});
 
 	var onReady = function(ev) {
@@ -109,10 +130,12 @@ jFresh.fn.FileExplorer = function(el, opts) {
 	};
 	me.el.addEventListener('ready', onReady);
 	
+	me.launcher = me.opts.launcherEl ? me.el.closest( me.opts.launcherEl ) : me.el;
 };
 
 jFresh.fn.FileExplorer.defaults = {
 	sktEl: '.SocketIO', //this.el.closest(sktEl)
+	launcherEl: '.AppLauncher',//this.el.closest(launcherEl)
 };
 
 jFresh.fn.FileExplorer.appInfo = {
@@ -124,24 +147,28 @@ jFresh.fn.FileExplorer.prototype = {
 		if ( !arguments.length ) return this._val;
 		
 		var me = this;
-		
 		v = fsTools.cleanPath( v );
+		
+		//prevent useless refresh
+		if ( me.__v == v ) return;
+		me.__v = v;
 		
 		me.filesView = me.el.querySelector('.FileExplorer_FilesView');
 		me.locationBar = me.el.querySelector('.FileExplorer_LocationBar');
 		me.places = me.el.querySelector('.FileExplorer_Places');
 
-		this._val = {baseName: '', dirName: '', stat: null};
+		var val = {baseName: '', dirName: '', stat: null};
 		var onStat = function(res) {
 			if ( fsTools.nodeType( res.d.mode ) == 'folder' ) {
-				me._val.dirName = v;
-				me._val.baseName = '';
+				val.dirName = v;
+				val.baseName = '';
 			}
 			else {
-				me._val.dirName = fsTools.dirName(v);
-				me._val.baseName = fsTools.baseName(v);
+				val.dirName = fsTools.dirName(v);
+				val.baseName = fsTools.baseName(v);
 			}
-			stat = me._val.stat = res.d;
+			stat = val.stat = res.d;
+			me._val = val;
 			
 			//notify our relevant children of this wonderous event!
 			me.locationBar.fileExplorer_LocationBar.val(v, stat);

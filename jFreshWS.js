@@ -1,6 +1,7 @@
 var pty = require('pty.js')
 	, fs = require('fs')
 	, extend = require('extend')
+	, mime = require('mime')
 	, term
 ;
 
@@ -23,6 +24,13 @@ function launch_terminal() {
 	});
 }
 
+//stat + mimetype
+fs.istat = function(path) {
+	var st = fs.lstatSync(path);
+	st.mimetype = mime.lookup(path);
+	return st;
+}
+
 fs.glob = function(path, _opts) {
 	var opts = extend({
 		filter: '*',
@@ -43,7 +51,7 @@ console.log('fs.glob', path, _opts);
 	var dtl = function() { 
 		//we need stat!?
 		if ( opts.details || !opts.folders || !opts.files ) {
-			var stat = fs.lstatSync(path+'/'+f);
+			var stat = fs.istat(path+'/'+f);
 			if ( !opts.folders && stat.isDirectory() ) return true;
 			if ( !opts.files && stat.isFile() ) return true;
 		}
@@ -57,7 +65,7 @@ console.log('fs.glob', path, _opts);
 			continue;
 		}
 		if ( opts.details ) {
-			st = fs.lstatSync(path+'/'+files[i]);
+			st = fs.istat(path+'/'+files[i]);
 			st.name = files[i];
 			st.mtime = st.mtime.getTime();
 			st.atime = st.atime.getTime();

@@ -10,8 +10,8 @@
 	overflow: hidden;
 	min-width: 100px;
 	min-height: 40px;
-	width: 480px;
-	height: 320px;
+	width: 50%;
+	height: 50%;
 }
 
 
@@ -263,7 +263,6 @@ jFresh.fn.Window = function(el, opts) {
 	}, args);*/
 
 	//~ this.manager = manager;
-	//~ this._create();
 	
 	el.moveable({handle: this.opts.headerEl, container: this.el.parentNode});
 	this.contentEl = this.el.closest( this.opts.contentEl );
@@ -306,16 +305,22 @@ jFresh.fn.Window.defaults = {
 };
 
 jFresh.fn.Window.prototype = {
+	get content() { 
+		return this.contentElChild;
+	},
 	set content(c) { 
 	//~ console.log('Window.setContent', content);
 		this.contentEl.innerHTML = '';
 		if ( typeof(c)=='string' ) { //consider it a template?
-			if (!jFresh.fn.Template.energize(c, this.contentEl)) {
+			if (!(this.contentElChild = jFresh.fn.Template.energize(c, this.contentEl))) {
 				this.contentEl.innerHTML = c;
+				this.contentElChild = this.contentEl;
 			}
 		}
-		else
+		else {
 			this.contentEl.appendChild(c);
+			this.contentElChild = c;
+		}
 	},
 	set title(t) { 
 		this.opts.title = t;
@@ -344,34 +349,6 @@ jFresh.fn.Window.prototype = {
 	},
 };
 
-
-jFresh.fn.Window.prototype._create = function() {
-
-	//~ if ( typeof this.opts.content == 'string' ) {
-		//~ win.querySelector('content').appendHtml( this.opts.content );
-	//~ }
-	//~ else {
-		//~ win.querySelector('content').appendChild( this.opts.content );
-	//~ }
-	
-//	this.activateWindow(win);
-	
-	win.animateClass('opening');
-	//~ win.animateClass('tada');
-	
-	win.style.left=0;
-	win.style.top=0;
-	
-	if ( this.opts.pos === 'auto' ) {
-		var style = window.getComputedStyle(this.el.parentNode);
-		if ( this.lastCoords > parseInt(style.height)-100 || this.lastCoords > parseInt(style.width)-100 ) this.lastCoords = 0;
-		win.style.left = this.lastCoords+'px';
-		win.style.top = this.lastCoords+'px';
-		this.lastCoords += 30;
-	}
-	
-	return win;
-};
 
 jFresh.fn.Window.prototype.minimize = function(args) {
 	var opts = jFresh.extend(true,{

@@ -75,6 +75,7 @@ jFresh.fn.Table = function(el, opts) {
 			}
 			t.classList.add('selected');
 			me.selected.push(t);
+			me.el.fireEvent('change');
 		});
 	}
 };

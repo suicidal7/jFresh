@@ -7,7 +7,7 @@
 
 
 <template id="jFresh.DocViewer">
-	<iframe fn="DocViewer"></iframe>
+	<iframe --sandbox="allow-forms allow-popups allow-pointer-lock allow-same-origin allow-scripts" fn="DocViewer"></iframe>
 </template>
 
 <script type="text/javascript">
@@ -17,6 +17,7 @@ jFresh.fn.DocViewer = function(el, opts) {
 	me.el = el;
 	me.opts = opts;
 	
+	console.log('DocViewer created');
 };
 
 jFresh.fn.DocViewer.defaults = {
@@ -29,8 +30,11 @@ jFresh.fn.DocViewer.appInfo = {
 
 
 jFresh.fn.DocViewer.prototype = {
-	launch: function(args) {
+	start: function(args) {
+console.log('STARTING DOCVIEWER', args, this.el);
 		if ( args instanceof Array ) args = args.shift(); //todo: deal with opening multiple docs, either launch new windows or new tabs?!
+		
+		if ( !args.match(/^[^:]+\/\//) ) args = document.location.origin+'/file'+ args;
 		
 		this.el.src = args;
 	},

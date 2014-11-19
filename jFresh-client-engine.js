@@ -14,6 +14,13 @@ jFresh = {
 	_onBeforeUnloadChain: [],
 	startNode: null,
 	
+	typeAssociations: {
+		'application/pdf': 'jFresh.DocViewer',
+		'application/doc': 'jFresh.DocViewer',
+		'text/plain': 'jFresh.DocViewer',
+		'image': 'jFresh.DocViewer',
+	}, //todo: load this on login
+	
 	fn: {
 	},
 	
