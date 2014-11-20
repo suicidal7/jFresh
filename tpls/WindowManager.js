@@ -116,9 +116,10 @@ jFresh.fn.WindowManager = function(workspace, opts) {
 	})();
 	
 	me.keyChain = [];
+	me.overrideSystemKeys = {};
 	
 	
-	me.bindKey('F5', function(ev) { return false; });
+	//~ me.bindKey('F5', function(ev) { return false; }, null, true);
 	me.bindKey('Ctrl+Alt+Left', function(ev) { var win = me.getActive(); win.window.snap('left'); });
 	me.bindKey('Ctrl+Alt+Right', function(ev) { var win = me.getActive(); win.window.snap('right'); });
 	me.bindKey('Ctrl+Alt+Up', function(ev) { var win = me.getActive(); win.window.maximize(true); });
@@ -180,16 +181,36 @@ jFresh.fn.WindowManager.prototype.hookGlobalListeners = function() {
 			return false;
 		}
 	},true);
+	window.addEventListener('keyup', function(ev) {
+		if ( window.currentWindowManager && window.currentWindowManager.onKeyUp.call(window.currentWindowManager, ev)===false ) {
+			ev.preventDefault();
+			ev.stopPropagation();
+			return false;
+		}
+	},true);
 	
 },
 
-jFresh.fn.WindowManager.prototype.bindKey = function( binding, cb, contain ) {
+jFresh.fn.WindowManager.prototype.bindKey = function( binding, cb, contain, overrideSystem ) {
 	var me=this;
 	if ( !me.keyBinds.hasOwnProperty(binding) ) me.keyBinds[binding] = [];
 	me.keyBinds[binding].push([cb, contain]);
+	if ( overrideSystem ) me.overrideSystemKeys[ binding ] = true;
 };
 
 jFresh.fn.WindowManager.prototype.onKeyDown = function( ev ) {
+	var me = this;
+	
+	var key = me.keyNames[ev.keyCode];
+//~ console.log('keydown', key);
+	if ( this.overrideSystemKeys.hasOwnProperty(key) ) {
+			ev.preventDefault();
+			ev.stopPropagation();
+			return false;
+	}
+}
+
+jFresh.fn.WindowManager.prototype.onKeyUp = function( ev ) {
 	var me = this;
 	
 	var key = me.keyNames[ev.keyCode];
@@ -197,10 +218,10 @@ jFresh.fn.WindowManager.prototype.onKeyDown = function( ev ) {
 	if (ev.ctrlKey) binding.push('Ctrl');
 	if (ev.altKey) binding.push('Alt');
 	if (ev.shiftKey) binding.push('Shift');
-	if (ev.metaKey) binding.push('Meta');
+	if (ev.modKey) binding.push('Mod');
 	if ( binding.indexOf(key)<0 ) binding.push(key);
 	binding = binding.join('+');
-	
+//~ console.log('keyup', binding);
 	if ( me.keyBinds.hasOwnProperty(binding) ) {
 		var bs = me.keyBinds[binding];
 		var isCancel;
