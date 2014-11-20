@@ -12,6 +12,7 @@ jFresh = {
 	_dummyContainer: document.createElement('div'),
 	_imgs: 'imgs/',
 	_onBeforeUnloadChain: [],
+	_globalHooks: {}, //stores which ojbects we've intialized global hooks for already
 	startNode: null,
 	
 	typeAssociations: {
@@ -49,6 +50,12 @@ extend: function() {
 	}
 	return target;
 },
+
+	_checkGlobalHooks: function( oName ) {
+		if ( jFresh._globalHooks.hasOwnProperty(oName) ) return;
+		jFresh._globalHooks[oName]=1;
+		if (jFresh.fn[oName].globalHooks) jFresh.fn[oName].globalHooks();
+	},
 	
 	energize2: function(el, container) {
 		//~ console.log('Energizing Element', el);
@@ -68,6 +75,8 @@ extend: function() {
 						}
 						var lowerName = oName.substr(0,1).toLowerCase()+oName.substr(1);
 						if ( !el.hasOwnProperty(lowerName) ) {
+							jFresh._checkGlobalHooks( oName );
+							
 							el[ lowerName ] = new jFresh.fn[ oName ]( el, opts );
 							el[ lowerName ].el = el;
 							el[ lowerName ].otps = opts;
