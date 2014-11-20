@@ -120,10 +120,10 @@ jFresh.fn.WindowManager = function(workspace, opts) {
 	
 	
 	//~ me.bindKey('F5', function(ev) { return false; }, null, true);
-	me.bindKey('Ctrl+Alt+Left', function(ev) { var win = me.getActive(); win.window.snap('left'); });
-	me.bindKey('Ctrl+Alt+Right', function(ev) { var win = me.getActive(); win.window.snap('right'); });
-	me.bindKey('Ctrl+Alt+Up', function(ev) { var win = me.getActive(); win.window.maximize(true); });
-	me.bindKey('Ctrl+Alt+Down', function(ev) { var win = me.getActive(); win.window.minimize({restore: true}); });
+	me.bindKey('Alt+Left', function(ev) { var win = me.getActive(); win.window.snap('left'); });
+	me.bindKey('Alt+Right', function(ev) { var win = me.getActive(); win.window.snap('right'); });
+	me.bindKey('Alt+Up', function(ev) { var win = me.getActive(); win.window.maximize(true); });
+	me.bindKey('Alt+Down', function(ev) { var win = me.getActive(); win.window.minimize({restore: true}); });
 };
 
 jFresh.fn.WindowManager.defaults = {

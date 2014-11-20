@@ -93,7 +93,6 @@ jFresh.fn.Resizable.setupHooks = function() {
 					resizeEl.style.top = style.top;
 					resizeEl.style.width = style.width;
 					resizeEl.style.height = style.height;
-					if ( resizeEl.classList.contains('snapped') ) resizeEl.classList.remove('snapped')
 					
 					me.__iframes = document.getElementsByTagName('iframe');
 					for(var i=0; i<me.__iframes.length; i++) {
@@ -102,6 +101,7 @@ jFresh.fn.Resizable.setupHooks = function() {
 					}
 					window.addEventListener('mouseup', events.mouseup);
 					window.addEventListener('mousemove', events.mousemove);
+					resizeEl.dispatchEvent(new CustomEvent('Resize.start'));
 				}
 				ev.preventDefault();
 				ev.stopPropagation();
@@ -112,14 +112,12 @@ jFresh.fn.Resizable.setupHooks = function() {
 			resizing = false;
 			window.removeEventListener('mouseup', events.mouseup);
 			window.removeEventListener('mousemove', events.mousemove);
-console.log('unhooking iframes', me.__iframes);
 			for(var i=0; i<me.__iframes.length; i++) {
 				me.__iframes[i].contentWindow.removeEventListener('mouseup', events.mouseup);
 				me.__iframes[i].contentWindow.removeEventListener('mousemove', events.mousemove);
 			}
 		},
 		mousemove: function(ev) {
-console.log('mousemove?!!!');
 			if ( !resizing ) return;
 			var style = window.getComputedStyle(resizeEl),
 				apply = {},

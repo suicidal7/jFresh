@@ -312,6 +312,13 @@ jFresh.fn.Window.defaults = {
 	minimizeTo: 'bottom-center', //or element
 };
 
+jFresh.fn.Window.globalHooks = function() {
+	document.addEventListener('Resize.start', function(ev) {
+		if ( ev.target.classList.contains('snapped') ) ev.target.window.unsnap(true);
+	}, true);
+};
+
+
 jFresh.fn.Window.prototype = {
 	get content() { 
 		return this.contentElChild;
@@ -372,9 +379,7 @@ jFresh.fn.Window.prototype.minimize = function(args) {
 			return win.window.maximize();
 		}
 		else if ( win.classList.contains('snapped') ) {
-			win.animateClass('minimizing');
-			win.classList.remove('snapped');
-			return;
+			return win.window.unsnap();
 		}
 	}
 
@@ -463,27 +468,44 @@ jFresh.fn.Window.prototype.close = function() {
 	});
 };
 
-jFresh.fn.Window.prototype.snap = function(dir) {
-	var win = this.el;
+jFresh.fn.Window.prototype.unsnap = function(keepSnapPos) {
+	var me = this, win=me.el;
 	
 	win.animateClass('maximizing');
-	if ( win.__snapped && win.__snapped == dir ) {
-		win.style.left = win.__snappedLR.left;
-		win.style.right = win.__snappedLR.right;
-		delete win.__snapped;
-		delete win.__snappedLR;
-		win.classList.remove('snapped');
+	win.classList.remove('snapped');
+	
+	if (!keepSnapPos) {
+		win.style.left = me.__savedSnapPos.left+'px';
+		win.style.top = me.__savedSnapPos.top+'px';
+		win.style.width = me.__savedSnapPos.width+'px';
+		win.style.height = me.__savedSnapPos.height+'px';
+		win.style.right = me.__savedSnapPos.right+'px';
+		win.style.bottom = me.__savedSnapPos.bottom+'px';
+	}
+	delete me.__snapped;
+	delete me.__savedSnapPos;
+};
+
+jFresh.fn.Window.prototype.snap = function(dir) {
+	var me = this;
+	var win = this.el;
+	
+	if ( me.__snapped && me.__snapped == dir ) {
+		//snap around to the other side ^^
+		me.snap( dir=='left'?'right':'left' );
 	}
 	else {
-		win.__snapped = dir;
+		if ( !me.__savedSnapPos ) me.__savedSnapPos = win.getBoundingClientRect();
+
+		win.animateClass('maximizing');
+		me.__snapped = dir;
 		win.classList.add('snapped');
-		win.__snappedLR = {left: win.style.left, right: win.style.right};
+
 		if ( dir=='left' ) {
 			win.style.left = 0;
 		}
 		else {
 			var st = window.getComputedStyle(win.parentNode);
-console.log('setting left', parseInt(st.width)/2);
 			win.style.left = (parseInt(st.width)/2) + 'px';
 		}
 	}
