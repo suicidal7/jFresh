@@ -41,8 +41,11 @@ body {
 	font-size: 12px;
 }
 
-table,ul {
-	background-color: rgba(0,0,0,0.1) !important;
+table,ul,.FixedHeaderTable {
+	background-color: rgba(0,0,0,0.5) !important;
+}
+.FixedHeaderTable>section>table {
+	background-color: transparent !important;
 }
 
 
@@ -355,7 +358,7 @@ a:focus {
 </template>
 
 <template id="jFresh.Desktop">
-	<div class="desktop-wrapper" fn="SocketIO Desktop RotateWallpaper" fn-disabled="MakeItRain" tabindex="1">
+	<div class="desktop-wrapper" fn="SocketIO Desktop RotateWallpaper" fn-disabled="MakeItRain">
 		<div class="workspace" fn="WindowManager AppLauncher">
 		</div>
 		<div class="taskbar" fn="Taskbar" Taskbar-manager="">
@@ -401,8 +404,10 @@ jFresh.fn.Desktop = function(el, opts) {
 
 	var onReady = function() {
 		me.wm = me.el.querySelector('.WindowManager').windowManager;
+		//~ me.wm.bindKey('Mod', function(ev) {
 		me.wm.bindKey('Alt', function(ev) {
 			me.el.querySelector('.taskbar>.apps-list').click();
+			return false;
 		});
 		me.el.removeEventListener('ready', onReady);
 	};

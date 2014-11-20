@@ -182,6 +182,8 @@ jFresh.fn.FileExplorer_FilesView = function(el, opts) {
 	}
 	//~ skt.send('js', [ 'fs.lstatSync', '/home/'+localStorage.user, '', true ], function(res) {
 	
+	//hook up addrows!
+	me.el.table.onAddRow = me._onAddRow;
 	
 	me.el.table.tbody.addEventListener('dblclick', function(ev) {
 		var t = ev.target;
@@ -290,8 +292,13 @@ jFresh.fn.FileExplorer_FilesView.prototype = {
 		var dt = new Date(file.mtime);
 		file.mtime = String("00" + dt.getDate()).slice(-2)+'/'+String("00" + (dt.getMonth()+1)).slice(-2)+'/'+dt.getFullYear();
 		file.size = fsTools.formatSize( file.size );
+		
+		this.dataRows.push([file, path+'/'+file.name]);
+		//~ var tr = this.el.table.addRow(file, path+'/'+file.name);
+	},
 	
-		var tr = this.el.table.addRow(file, path+'/'+file.name);
+	//call from table!
+	_onAddRow: function(tr, file, uid) {
 		var td = tr.children[0];
 		var ins = document.createElement('ins');
 		ins.classList.add('icon');
@@ -309,6 +316,27 @@ jFresh.fn.FileExplorer_FilesView.prototype = {
 		td.insertBefore( ins, td.firstChild );
 		tr.__file = file;
 	},
+	
+	_onetimeHooks: function() {
+		//~ if ( window.__FileExplorer
+	
+		var mousewheelevt = (/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel" //FF doesn't recognize mousewheel as of FF3.x
+		
+		var onScroll = function() {
+			//~ me.el.table.tbody
+//~ console.log('onScroll', me.el.parentNode.scrollHeight - me.el.parentNode.scrollTop );
+			var stl = window.getComputedStyle(me.el.parentNode);
+			if ( (me.el.parentNode.scrollHeight - me.el.parentNode.scrollTop) - parseInt(stl.height) < 100 ) {
+				pLoad();
+			}
+		};
+		
+	},
+	
+	//loads up to X rows from the internal data
+	//~ _progressiveLoad: function() {
+		
+	//~ },
 
 	val: function(v, stat) {
 		var me = this;
@@ -354,45 +382,11 @@ console.log('fs.glob', path, res);
 						return afolder ? -1 : 1;
 					});
 					
-					var progressiveLoad = function(res) {
-						var listenerSet;
-						var mousewheelevt = (/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel" //FF doesn't recognize mousewheel as of FF3.x
-						
-						var onScroll = function() {
-							//~ me.el.table.tbody
-	//~ console.log('onScroll', me.el.parentNode.scrollHeight - me.el.parentNode.scrollTop );
-							var stl = window.getComputedStyle(me.el.parentNode);
-							if ( (me.el.parentNode.scrollHeight - me.el.parentNode.scrollTop) - parseInt(stl.height) < 100 ) {
-								pLoad();
-							}
-						};
-						var lastStop = 0;
-	console.log('total of ', res.d.length);
-						var pLoad = function() {
-	console.log('progressiveLoad', lastStop, res.d.length);
-							var currCount=0;
-							for(var i=lastStop; i<res.d.length && currCount<50; i++) {
-								me.addFile(path, res.d[i]);
-								currCount++;
-							}
-							lastStop = i;
-							
-							if ( lastStop>=res.d.length ) {
-	console.log('progressiveLoad done!');
-								me.el.removeEventListener(mousewheelevt, onScroll);
-							}
-							else if ( !listenerSet ) {
-								listenerSet = true;
-								me.el.addEventListener(mousewheelevt, onScroll);
-							}
-						//~ for(var i=0; i<res.d.length && i < max; i++) { me.addFile(path, res.d[i]) };
-						//~ if ( 
-						//~ if ( max == 50 ) max = 10;
-						};
-						pLoad();
-					};
-					
-					progressiveLoad(res);
+					me.dataRows = [];
+					for(var i=0; i<res.d.length; i++) {
+						me.addFile(path, res.d[i]);
+					}
+					me.el.table.setRows(me.dataRows);
 				});
 			};
 			
