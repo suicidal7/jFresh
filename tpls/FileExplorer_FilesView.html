@@ -317,30 +317,8 @@ jFresh.fn.FileExplorer_FilesView.prototype = {
 		tr.__file = file;
 	},
 	
-	_onetimeHooks: function() {
-		//~ if ( window.__FileExplorer
-	
-		var mousewheelevt = (/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel" //FF doesn't recognize mousewheel as of FF3.x
-		
-		var onScroll = function() {
-			//~ me.el.table.tbody
-//~ console.log('onScroll', me.el.parentNode.scrollHeight - me.el.parentNode.scrollTop );
-			var stl = window.getComputedStyle(me.el.parentNode);
-			if ( (me.el.parentNode.scrollHeight - me.el.parentNode.scrollTop) - parseInt(stl.height) < 100 ) {
-				pLoad();
-			}
-		};
-		
-	},
-	
-	//loads up to X rows from the internal data
-	//~ _progressiveLoad: function() {
-		
-	//~ },
-
 	val: function(v, stat) {
 		var me = this;
-//~ console.log('FilesView.val', v, stat);
 		//getter
 		if ( !arguments.length ) return me.el.table.selected; //todo: ?
 		

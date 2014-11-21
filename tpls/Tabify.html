@@ -9,7 +9,9 @@
 }
 
 .Tabify-wrapper>header {
-	flex: 0 1 auto;
+	flex: 0 0 auto;
+	height: 28px;
+	padding-top: 2px;
 }
 
 .Tabify-wrapper>header>* {
@@ -35,6 +37,7 @@
 .Tabify-wrapper [tab-uid] {
 	flex: 1 1 auto;
 	align-self: stretch;
+	display: flex;
 }
 
 
@@ -83,19 +86,26 @@ jFresh.fn.Tabify.defaults = {
 };
 
 jFresh.fn.Tabify.prototype = {
-	addTab: function(el) {
+	addTab: function(el, opts) {
+		opts = jFresh.extend(true, {
+			title: el.getAttribute('tab-title') || "Tab",
+			uid: el.getAttribute('tab-uid')||jFresh.uuid(),
+		}, opts);
 		var me = this;
+		
 		el.hide();
 		//todo: make this a template?
 		var lnk = document.createElement('a');
-		lnk.setAttribute('href', '#'+(el.getAttribute('tab-uid')||jFresh.uuid()));
-		lnk.innerHTML = el.getAttribute('tab-title') || "Tab";
+		lnk.setAttribute('href', '#'+opts.uid);
+		lnk.innerHTML = opts.title;
 		me.tabs.appendChild( lnk );
+		if ( !me.el.contains(el) ) me.el.appendChild(el);
 	},
-	setActive: function(tabEl) {
+	
+	setActive: function(tabEl) { //tabEl or uid to set active
 		var me = this;
 		var uid;
-console.log('setActiveTab', tabEl);
+		
 		if ( typeof(tabEl)=='string') {
 			uid = tabEl;
 			tabEl = me.tabs.querySelector('[href="#'+tabEl+'"]');
@@ -119,6 +129,7 @@ console.log('setActiveTab', tabEl);
 		
 		me._activeTab = tabEl;
 	},
+	
 };
 
 

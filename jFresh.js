@@ -72,6 +72,9 @@ app.get('/jFresh.js', function (req, res) {
 });
 
 app.get('/file/*', function (req, res) {
+	var uKey = req.headers.cookie.match(/UKEY=([\d\w]{8}-[\d\w]{4}-[\d\w]{4}-[\d\w]{4}-[\d\w]{12})/);
+	if ( !uKey ) return;
+	uKey = uKey[1];
 	
 	var sendfile = function(path, options, fn){
 		var self = this

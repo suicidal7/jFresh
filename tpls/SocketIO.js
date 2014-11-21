@@ -34,6 +34,7 @@ jFresh.fn.SocketIO = function( el, opts ) {
 	});
 	
 	me.skt.on('sessionKey', function(nfo) {
+		jFresh.setCookie('UKEY', nfo.key);
 		localStorage.userKey = nfo.key;
 		localStorage.user = nfo.user;
 		me.is_open = true;
