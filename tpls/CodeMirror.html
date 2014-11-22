@@ -58,14 +58,14 @@
 
 </style>
 
-<template id="jFresh.CodeEd">
+<template id="XTC.CodeEd">
 	<div fn="CodeEd">
 		
 	</div>
 </template>
 
 <script type="text/javascript">
-jFresh.fn.CodeEd = function(el, opts) {
+xtc.fn.CodeEd = function(el, opts) {
 	var me = this;
 	this.el = el;
 	this.opts = opts;
@@ -101,14 +101,22 @@ jFresh.fn.CodeEd = function(el, opts) {
 };
 
 
-jFresh.fn.CodeEd.prototype = {
+xtc.fn.CodeEd.prototype = {
 
 	resolveMode: function(file,mime) {
+console.log('resolveMode', file,mime);
 		var ext = fsTools.ext(file);
 		if (ext=='php' ) return 'text/x-php';
-		var i = mime.indexOf(';');
-		if ( i>-1 ) mime = mime.substr(0,i);
+		if (mime) {
+			var i = mime.indexOf(';');
+			if ( i>-1 ) mime = mime.substr(0,i);
+		}
 		return mime;
+	},
+	
+	focus: function() {
+		this.cm.refresh();
+		this.cm.focus();
 	},
 	
 	open: function(file) {

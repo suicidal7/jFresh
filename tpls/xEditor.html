@@ -1,19 +1,54 @@
 
-<template id="jFresh.xEditor">
+<template id="XTC.xEditor">
 	<div fn="Tabify xEditor">
+		<div data-uid="/file/tmp/Untitled" tab-title="Untitled" fn="Template" Template-id="XTC.CodeEd"></div>
+		<div data-uid="/file/tmp/Untitled2" tab-title="Untitled2" fn="Template" Template-id="XTC.CodeEd"></div>
+	</div>
+
 		
 	</div>
 </template>
 
 <script type="text/javascript">
-jFresh.fn.xEditor = function(el, opts) {
+xtc.fn.xEditor = function(el, opts) {
+	var me = this;
+	me.el = el;
+	me.opts = opts;
+	
+	me.el.addEventListener('Tabify.setActive', function(ev) {
+		ev.detail.querySelector('.CodeEd').codeEd.focus();
+	});
+
+	var initKeys = function() {
+		me.el.removeEventListener('ready', initKeys);
+		var keys = me.el.nearest( me.opts.keybinderEl );
+		if ( !keys ) return;
+		
+		keys = keys.windowManager;
+		keys.bindKey('Ctrl+PageUp', function() {
+			me.el.tabify.cycle(-1);
+		}, me.el, true );
+		keys.bindKey('Ctrl+PageDown', function() {
+			me.el.tabify.cycle();
+		}, me.el, true );	
+		keys.bindKey('Alt+O', function() {
+			alert('open file');
+		}, me.el, true );	
+	};
+	
+	me.el.addEventListener('ready', initKeys);
+	
 	
 };
 
-jFresh.fn.xEditor.appInfo = {title: 'xEditor'};
+xtc.fn.xEditor.defaults = {
+	keybinderEl: '.WindowManager', //performs .nearest()
+};
+
+xtc.fn.xEditor.appInfo = {title: 'xEditor'};
 
 
-jFresh.fn.xEditor.prototype = {
+xtc.fn.xEditor.prototype = {
 	
 };
 

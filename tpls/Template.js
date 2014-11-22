@@ -1,6 +1,6 @@
 //Takes in an element that is referencing templates and goes
 // over them and replaces them with the templated codes
-jFresh.fn.Template = function(el, opts) {
+xtc.fn.Template = function(el, opts) {
 	this.el = el;
 	this.opts = opts;
 	
@@ -8,24 +8,24 @@ jFresh.fn.Template = function(el, opts) {
 	this.loadTemplate(this.opts.id, this.el);
 };
 
-jFresh.fn.Template.defaults = {
+xtc.fn.Template.defaults = {
 	'id': ''
 };
 
 //create and energize a template
-jFresh.fn.Template.energize = function(tpl, el) {
-	if ( !el ) el = jFresh._dummyContainer;
-	var tplEl = jFresh.fn.Template.prototype.loadTemplate( tpl, el);
+xtc.fn.Template.energize = function(tpl, el) {
+	if ( !el ) el = xtc._dummyContainer;
+	var tplEl = xtc.fn.Template.prototype.loadTemplate( tpl, el);
 	if ( !tplEl ) return;
 	//~ for(var i=0; i<tplEl.length; i++) {
-		//~ jFresh.energize2( tplEl[i] );
+		//~ xtc.energize2( tplEl[i] );
 	//~ }
 	return tplEl.length>1 ? tplEl : tplEl[0];
 },
 
 //parses el for tpl attrs and replaces the contents accordingly
 // while recursing on children
-jFresh.fn.Template.prototype.parseEl = function(el) {
+xtc.fn.Template.prototype.parseEl = function(el) {
 	if ( el.hasAttribute('tpl') ) {
 		this.loadTemplate(el.getAttribute('tpl'), el);
 	}
@@ -35,7 +35,7 @@ jFresh.fn.Template.prototype.parseEl = function(el) {
 	}
 };
 
-jFresh.fn.Template.prototype.loadTemplate = function(tpl, container) {
+xtc.fn.Template.prototype.loadTemplate = function(tpl, container) {
 	//~ console.log('Building template:', tpl);
 	var tplChild, tplRoot = document.getElementById(tpl);
 	if (!tplRoot) {
@@ -52,7 +52,7 @@ jFresh.fn.Template.prototype.loadTemplate = function(tpl, container) {
 		//~ while(dummies.length) dummies[0].remove();
 		
 		container.appendChild( tplEl[i] );
-		jFresh.energize2( tplEl[i] , container);
+		xtc.energize2( tplEl[i] , container);
 	}
 	
 	return tplEl;

@@ -38,12 +38,12 @@
 
 </style>
 
-<template id="jFresh.NavCrumbs.item">
+<template id="XTC.NavCrumbs.item">
 	<a href="#"></a>
 </template>
 
 <script type="text/javascript">
-jFresh.fn.NavCrumbs = function(el, opts) {
+xtc.fn.NavCrumbs = function(el, opts) {
 	this.el = el;
 	this.opts = opts;
 	var me = this;
@@ -58,14 +58,14 @@ jFresh.fn.NavCrumbs = function(el, opts) {
 	me.el.innerHTML = 'Loading...';
 };
 
-jFresh.fn.NavCrumbs.defaults = {
-	itemTpl: 'jFresh.NavCrumbs.item',
+xtc.fn.NavCrumbs.defaults = {
+	itemTpl: 'XTC.NavCrumbs.item',
 	splitOn: '/',
 	//~ itemIdAttr: 'data-uid', //uid attribute
 	itemText: 'a', //element in tpl to set .innerHTML
 };
 
-jFresh.fn.NavCrumbs.prototype.setSelected = function(uid) {
+xtc.fn.NavCrumbs.prototype.setSelected = function(uid) {
 	var me=this
 		, el = typeof(uid) =='string' ? null : uid
 		, ch
@@ -85,7 +85,7 @@ jFresh.fn.NavCrumbs.prototype.setSelected = function(uid) {
 	}
 };
 
-jFresh.fn.NavCrumbs.prototype.val = function(crumb) {
+xtc.fn.NavCrumbs.prototype.val = function(crumb) {
 	if ( !arguments.length ) return this._val;
 	var me = this;
 	//if we have same value already, set as selected and return
@@ -103,7 +103,7 @@ jFresh.fn.NavCrumbs.prototype.val = function(crumb) {
 		var c = me.crumbs[i];
 		chain.push(c);
 		if ( c=='' ) c='/';
-		var tpl = jFresh.fn.Template.energize( me.opts.itemTpl, me.el );
+		var tpl = xtc.fn.Template.energize( me.opts.itemTpl, me.el );
 		(tpl.matches(me.opts.itemText) ? tpl : tpl.querySelector(me.opts.itemText)).innerHTML = c;
 		tpl.classList.add('NavCrumbs-item');
 		tpl.setAttribute('data-uid', chain.join(me.opts.splitOn)||'/' );

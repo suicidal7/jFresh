@@ -1,10 +1,10 @@
 Node.prototype.appendHtml = function(html) {
-	jFresh._dummyContainer.innerHTML = html;
+	xtc._dummyContainer.innerHTML = html;
 	var els = [];
-	if ( jFresh._dummyContainer.children.length ) {
-		while(jFresh._dummyContainer.children.length) {
-			els.push( jFresh._dummyContainer.children[0] );
-			this.appendChild(jFresh._dummyContainer.children[0]);
+	if ( xtc._dummyContainer.children.length ) {
+		while(xtc._dummyContainer.children.length) {
+			els.push( xtc._dummyContainer.children[0] );
+			this.appendChild(xtc._dummyContainer.children[0]);
 		}
 	}
 	else {

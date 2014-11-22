@@ -55,7 +55,7 @@
 </style>
 
 
-<template id="jFresh.FileExplorer.LocationBar">
+<template id="XTC.FileExplorer.LocationBar">
 	<div fn="FileExplorer_LocationBar">
 		<div class="NavCrumbs-wrapper">
 			<div fn="IconButton" class="i24 pen"></div>
@@ -68,14 +68,14 @@
 
 <script type="text/javascript">1
 
-jFresh.fn.AutoComplete = function(el, opts) {
+xtc.fn.AutoComplete = function(el, opts) {
 	var me = this;
 	me.el = el;
 	me.opts = opts;
 	
 	me._requested = {};
 	
-	var uid = jFresh.uuid();
+	var uid = xtc.uuid();
 	el.insertAdjacentHTML('afterend', '<datalist id="'+uid+'"></datalist>');
 	me.datalistEl = el.nextElementSibling;
 	me.el.setAttribute('list',uid);
@@ -92,12 +92,12 @@ console.log('hooking autocomplete 0');
 	
 };
 
-jFresh.fn.AutoComplete.defaults = {
+xtc.fn.AutoComplete.defaults = {
 	fnEl: '', //this.el.closest(fnEl).autoCompleteFn() otherwise, this.el.autoCompleteFn()
 	acKey: 1, //1=means refresh on any new char, otherwise we expect a key
 };
 
-jFresh.fn.AutoComplete.prototype = {
+xtc.fn.AutoComplete.prototype = {
 	setOptions: function(opts, append) {
 		if ( typeof opts =='function' ) {
 			return this.hookAutoComplete(opts);
@@ -165,7 +165,7 @@ jFresh.fn.AutoComplete.prototype = {
 };
 
 
-jFresh.fn.FileExplorer_LocationBar = function(el, opts) {
+xtc.fn.FileExplorer_LocationBar = function(el, opts) {
 	var me = this;
 	me.el = el;
 	me.opts = opts;
@@ -225,11 +225,11 @@ jFresh.fn.FileExplorer_LocationBar = function(el, opts) {
 	
 };
 
-jFresh.fn.FileExplorer_LocationBar.defaults = {
+xtc.fn.FileExplorer_LocationBar.defaults = {
 	sktEl: '',
 };
 
-jFresh.fn.FileExplorer_LocationBar.prototype = {
+xtc.fn.FileExplorer_LocationBar.prototype = {
 	val: function(v, stat) {
 		if ( !arguments.length ) return this._val;
 		

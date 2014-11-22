@@ -1,4 +1,4 @@
-jFresh.fn.Popup = function(el, opts) {
+xtc.fn.Popup = function(el, opts) {
 	this.el = el;
 	this.hidden = false;
 	this.opts = opts;
@@ -11,17 +11,17 @@ jFresh.fn.Popup = function(el, opts) {
 	this.el.classList.add('Popup');
 	this.hide();
 	
-	jFresh.fn.Popup.hookUp();
+	xtc.fn.Popup.hookUp();
 };
 
-jFresh.fn.Popup.defaults = {
+xtc.fn.Popup.defaults = {
 	handle: '',
 	location: 'top left,top left'
 };
 
-jFresh.fn.Popup.hookUp = function() {
-	if ( jFresh.__Popup__ ) return;
-	jFresh.__Popup__ = true;
+xtc.fn.Popup.hookUp = function() {
+	if ( xtc.__Popup__ ) return;
+	xtc.__Popup__ = true;
 	
 	document.addEventListener('click', function(ev) {
 		var t = ev.target;
@@ -41,7 +41,7 @@ jFresh.fn.Popup.hookUp = function() {
 	});
 };
 
-jFresh.fn.Popup.prototype.show = function() {
+xtc.fn.Popup.prototype.show = function() {
 	if ( !this.hidden ) return;
 	this.el.show();
 	var p = this.opts.location.split(',');
@@ -49,12 +49,12 @@ jFresh.fn.Popup.prototype.show = function() {
 	this.hidden = false;
 };
 
-jFresh.fn.Popup.prototype.hide = function() {
+xtc.fn.Popup.prototype.hide = function() {
 	if ( this.hidden ) return;
 	this.el.hide();
 	this.hidden = true;
 };
 
-jFresh.fn.Popup.prototype.toggle = function() {
+xtc.fn.Popup.prototype.toggle = function() {
 	this[this.hidden ? 'show' : 'hide']();
 };

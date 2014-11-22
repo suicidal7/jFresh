@@ -1,10 +1,10 @@
-Node.prototype.moveable = function(options) {
+Node.prototype.movable = function(options) {
 	var me = this;
 	
-	if ( me.__moveable ) return this;
-	me.__moveable = true;
+	if ( me.__movable ) return this;
+	me.__movable = true;
 	
-	var opts = jFresh.extend(true,{
+	var opts = xtc.extend(true,{
 		handle: false,
 		container: false,
 		bound: false,
@@ -14,13 +14,13 @@ Node.prototype.moveable = function(options) {
 	var drag;
 	var dragInfo = {};
 		
-	if ( opts.container && !opts.container.__moveableHighlighter ) {
+	if ( opts.container && !opts.container.__movableHighlighter ) {
 		//add div to be used for smart edge positioning
 		var div = document.createElement('div');
-		opts.container.__moveableHighlighter = div;
+		opts.container.__movableHighlighter = div;
 		div.style.display='none';
 		div.style.position='absolute';
-		div.classList.add('moveable-highligher'); //todo: make class configurable?
+		div.classList.add('movable-highligher'); //todo: make class configurable?
 		opts.container.appendChild(div);
 	}
 	
@@ -64,7 +64,7 @@ Node.prototype.moveable = function(options) {
 			return false;
 		},
 		mouseup: function(ev) {
-//~ console.log('moveable mouseup');
+//~ console.log('movable mouseup');
 			//~ drag.exitPointerLock();
 			drag = false;
 			window.removeEventListener('mouseup', events.mouseup);
@@ -95,8 +95,8 @@ Node.prototype.moveable = function(options) {
 				me.style.top = y + 'px';
 console.log('xy', dragInfo.x, dragInfo.y, dragInfo.autoSize);
 				if (dragInfo.autoSize) {
-					me.dispatchEvent(new CustomEvent('Moveable.resize', {detail: dragInfo.autoSize}) );
-					opts.container.__moveableHighlighter.style.display='none';
+					me.dispatchEvent(new CustomEvent('movable.resize', {detail: dragInfo.autoSize}) );
+					opts.container.__movableHighlighter.style.display='none';
 				}
 			}
 		},
@@ -118,38 +118,38 @@ console.log('xy', dragInfo.x, dragInfo.y, dragInfo.autoSize);
 //~ console.log(rect, ev.pageX, ev.screenX);
 					
 					if ( ev.pageX >  rect.width-10 ) {
-						opts.container.__moveableHighlighter.style.left='auto';
-						opts.container.__moveableHighlighter.style.right=0;
-						opts.container.__moveableHighlighter.style.top=0;
-						opts.container.__moveableHighlighter.style.bottom=0;
-						opts.container.__moveableHighlighter.style.width='50%';
-						opts.container.__moveableHighlighter.style.display='block';
+						opts.container.__movableHighlighter.style.left='auto';
+						opts.container.__movableHighlighter.style.right=0;
+						opts.container.__movableHighlighter.style.top=0;
+						opts.container.__movableHighlighter.style.bottom=0;
+						opts.container.__movableHighlighter.style.width='50%';
+						opts.container.__movableHighlighter.style.display='block';
 						dragInfo.autoSize = 'right';
 						x = drag.style.left;
 					}
 					else if ( ev.pageX<10) {
-						opts.container.__moveableHighlighter.style.right='auto';
-						opts.container.__moveableHighlighter.style.left=0;
-						opts.container.__moveableHighlighter.style.top=0;
-						opts.container.__moveableHighlighter.style.bottom=0;
-						opts.container.__moveableHighlighter.style.width='50%';
-						opts.container.__moveableHighlighter.style.display='block';
+						opts.container.__movableHighlighter.style.right='auto';
+						opts.container.__movableHighlighter.style.left=0;
+						opts.container.__movableHighlighter.style.top=0;
+						opts.container.__movableHighlighter.style.bottom=0;
+						opts.container.__movableHighlighter.style.width='50%';
+						opts.container.__movableHighlighter.style.display='block';
 						dragInfo.autoSize = 'left';
 						x = drag.style.left;
 					}
 					else if ( ev.pageY<10) {
-						opts.container.__moveableHighlighter.style.right=0;
-						opts.container.__moveableHighlighter.style.left=0;
-						opts.container.__moveableHighlighter.style.top=0;
-						opts.container.__moveableHighlighter.style.bottom=0;
-						opts.container.__moveableHighlighter.style.width='auto';
-						opts.container.__moveableHighlighter.style.display='block';
+						opts.container.__movableHighlighter.style.right=0;
+						opts.container.__movableHighlighter.style.left=0;
+						opts.container.__movableHighlighter.style.top=0;
+						opts.container.__movableHighlighter.style.bottom=0;
+						opts.container.__movableHighlighter.style.width='auto';
+						opts.container.__movableHighlighter.style.display='block';
 						dragInfo.autoSize = 'max';
 						x = drag.style.left;
 					}
 					else {
 						dragInfo.autoSize = false;
-						opts.container.__moveableHighlighter.style.display='none';
+						opts.container.__movableHighlighter.style.display='none';
 						if ( ev.pageY>60 && drag.classList.contains('snapped') ) drag.classList.remove('snapped');
 					}
 					if ( ev.pageY >  rect.height-10 ) {

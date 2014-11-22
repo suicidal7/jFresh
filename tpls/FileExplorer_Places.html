@@ -58,10 +58,10 @@
 
 </style>
 
-<template id="jFresh.FileExplorer.Places.titleItem">
+<template id="XTC.FileExplorer.Places.titleItem">
 	<li class="title">Places</li>
 </template>
-<template id="jFresh.FileExplorer.Places.item">
+<template id="XTC.FileExplorer.Places.item">
 	<li class="link"><ins></ins><span></span></li>
 </template>
 
@@ -70,7 +70,7 @@
 <script type="text/javascript">
 
 
-jFresh.fn.FileExplorer_Places = function(el, opts) {
+xtc.fn.FileExplorer_Places = function(el, opts) {
 	this.el = el;
 	this.opts = opts;
 	var me = this;
@@ -127,28 +127,28 @@ jFresh.fn.FileExplorer_Places = function(el, opts) {
 	});
 };
 
-jFresh.fn.FileExplorer_Places.defaults = {
-	titleTpl: 'jFresh.FileExplorer.Places.titleItem',
-	itemTpl: 'jFresh.FileExplorer.Places.item',
+xtc.fn.FileExplorer_Places.defaults = {
+	titleTpl: 'XTC.FileExplorer.Places.titleItem',
+	itemTpl: 'XTC.FileExplorer.Places.item',
 	titleEl: '.title',
 	linkEl: '.link>span',
 	iconEl: '.link>ins',
 	classPrefix: 'places-',
 };
 
-jFresh.fn.FileExplorer_Places.prototype.addTitle = function(title) {
-	var el = jFresh.fn.Template.energize(this.opts.titleTpl, this.el);
+xtc.fn.FileExplorer_Places.prototype.addTitle = function(title) {
+	var el = xtc.fn.Template.energize(this.opts.titleTpl, this.el);
 	el.closest(this.opts.titleEl).innerHTML = title;
 };
 
-jFresh.fn.FileExplorer_Places.prototype.addLink = function(title, uid) {
-	var el = jFresh.fn.Template.energize(this.opts.itemTpl, this.el);
+xtc.fn.FileExplorer_Places.prototype.addLink = function(title, uid) {
+	var el = xtc.fn.Template.energize(this.opts.itemTpl, this.el);
 	el.closest(this.opts.iconEl).classList.add(this.opts.classPrefix+title);
 	el.closest(this.opts.linkEl).innerHTML = title;
 	el.setAttribute('data-uid', uid);
 };
 
-jFresh.fn.FileExplorer_Places.prototype.val = function(v, stat) {
+xtc.fn.FileExplorer_Places.prototype.val = function(v, stat) {
 	if ( !arguments.length ) return this._val;
 	
 	this._val = v;

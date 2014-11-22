@@ -16,7 +16,7 @@
 	.Resizable-handle.se { right: 0; bottom: 0; width: 5px; height: 5px; cursor: se-resize; }
 </style>
 
-<template id="jFresh.Resizable">
+<template id="XTC.Resizable">
 	<div class="Resizable-handle nw"></div>
 	<div class="Resizable-handle ne"></div>
 	<div class="Resizable-handle sw"></div>
@@ -29,17 +29,17 @@
 
 <script type="text/javascript">
 
-jFresh.fn.Resizable = function(el, opts) {
+xtc.fn.Resizable = function(el, opts) {
 	this.el = el;
 	this.opts = opts;
 	
-	if ( !jFresh.__Resizable__ ) {
-		jFresh.fn.Resizable.setupHooks();
+	if ( !xtc.__Resizable__ ) {
+		xtc.fn.Resizable.setupHooks();
 	}
 	
 	var style = window.getComputedStyle(el);
 	if (style.position == 'static' ) el.style.position = 'relative';
-	jFresh.fn.Template.energize('jFresh.Resizable', el);
+	xtc.fn.Template.energize('XTC.Resizable', el);
 	
 	var handles = {};
 	if ( this.opts.which == 'all' ) this.opts.which = 'n s e w';
@@ -62,14 +62,14 @@ jFresh.fn.Resizable = function(el, opts) {
 	//~ }
 };
 
-jFresh.fn.Resizable.defaults = {
+xtc.fn.Resizable.defaults = {
 	which: 'all', //both/height/width
 };
 
 //sets up 1 event listener for all our resizable targets
 //instead of 1 for each...
-jFresh.fn.Resizable.setupHooks = function() {
-	jFresh.__Resizable__ = true;
+xtc.fn.Resizable.setupHooks = function() {
+	xtc.__Resizable__ = true;
 	var resizing = false;
 	var resizeEl;
 	var start = {};

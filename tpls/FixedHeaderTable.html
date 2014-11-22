@@ -76,7 +76,7 @@
 
 </style>
 
-<template id="jFresh.FixedHeaderTable">
+<template id="XTC.FixedHeaderTable">
 	<article>
 		<header></header>
 		<section>
@@ -88,10 +88,10 @@
 <script type="text/javascript">
 
 
-jFresh.fn.FixedHeaderTable = function(el, opts) {
+xtc.fn.FixedHeaderTable = function(el, opts) {
 	this.el = el;
 	this.opts = opts;
-	this.wrapper = jFresh.fn.Template.energize('jFresh.FixedHeaderTable', el.parentNode);
+	this.wrapper = xtc.fn.Template.energize('XTC.FixedHeaderTable', el.parentNode);
 	this.wrapper.classList.add('FixedHeaderTable');
 	el.parentNode.insertBefore( this.wrapper, el);
 	var foo = this.wrapper.querySelector('table');

@@ -6,13 +6,13 @@
 </style>
 
 
-<template id="jFresh.DocViewer">
+<template id="XTC.DocViewer">
 	<iframe --sandbox="allow-forms allow-popups allow-pointer-lock allow-same-origin allow-scripts" fn="DocViewer"></iframe>
 </template>
 
 <script type="text/javascript">
 
-jFresh.fn.DocViewer = function(el, opts) {
+xtc.fn.DocViewer = function(el, opts) {
 	var me = this;
 	me.el = el;
 	me.opts = opts;
@@ -20,16 +20,16 @@ jFresh.fn.DocViewer = function(el, opts) {
 	console.log('DocViewer created');
 };
 
-jFresh.fn.DocViewer.defaults = {
+xtc.fn.DocViewer.defaults = {
 	sktEl: '.SocketIO', //this.el.closest(sktEl)
 };
 
-jFresh.fn.DocViewer.appInfo = {
+xtc.fn.DocViewer.appInfo = {
 	title: 'DocViewer',
 };
 
 
-jFresh.fn.DocViewer.prototype = {
+xtc.fn.DocViewer.prototype = {
 	start: function(args) {
 console.log('STARTING DOCVIEWER', args, this.el);
 		if ( args instanceof Array ) args = args.shift(); //todo: deal with opening multiple docs, either launch new windows or new tabs?!

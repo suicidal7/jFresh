@@ -8,7 +8,7 @@
 	 
 
 
-jFresh = {
+xtc = {
 	_dummyContainer: document.createElement('div'),
 	_imgs: 'imgs/',
 	_onBeforeUnloadChain: [],
@@ -16,10 +16,10 @@ jFresh = {
 	startNode: null,
 	
 	typeAssociations: {
-		'application/pdf': 'jFresh.DocViewer',
-		'application/doc': 'jFresh.DocViewer',
-		'text/plain': 'jFresh.DocViewer',
-		'image': 'jFresh.DocViewer',
+		'application/pdf': 'XTC.DocViewer',
+		'application/doc': 'XTC.DocViewer',
+		'text/plain': 'XTC.DocViewer',
+		'image': 'XTC.DocViewer',
 	}, //todo: load this on login
 	
 	fn: {
@@ -52,9 +52,9 @@ extend: function() {
 },
 
 	_checkGlobalHooks: function( oName ) {
-		if ( jFresh._globalHooks.hasOwnProperty(oName) ) return;
-		jFresh._globalHooks[oName]=1;
-		if (jFresh.fn[oName].globalHooks) jFresh.fn[oName].globalHooks();
+		if ( xtc._globalHooks.hasOwnProperty(oName) ) return;
+		xtc._globalHooks[oName]=1;
+		if (xtc.fn[oName].globalHooks) xtc.fn[oName].globalHooks();
 	},
 	
 	energize2: function(el, container) {
@@ -65,9 +65,9 @@ extend: function() {
 				var fnArray = el.getAttribute('fn').split(' ');
 				for(var k=0; k<fnArray.length; k++) {
 					var defs, opts, oName = fnArray[k];
-					if ( jFresh.fn.hasOwnProperty(oName) ) {
+					if ( xtc.fn.hasOwnProperty(oName) ) {
 						opts = {};
-						defs = jFresh.fn[ oName ].defaults;
+						defs = xtc.fn[ oName ].defaults;
 						if ( defs ) { //if app has default configurable params, try to read their values from element's attributes...
 							for(var setting in defs ) {
 								opts[setting] = el.getAttribute(oName+'-'+setting) || container.getAttribute(oName+'-'+setting) || defs[setting];
@@ -75,9 +75,9 @@ extend: function() {
 						}
 						var lowerName = oName.substr(0,1).toLowerCase()+oName.substr(1);
 						if ( !el.hasOwnProperty(lowerName) ) {
-							jFresh._checkGlobalHooks( oName );
+							xtc._checkGlobalHooks( oName );
 							
-							el[ lowerName ] = new jFresh.fn[ oName ]( el, opts );
+							el[ lowerName ] = new xtc.fn[ oName ]( el, opts );
 							el[ lowerName ].el = el;
 							el[ lowerName ].otps = opts;
 							el.classList.add(oName);
@@ -113,22 +113,22 @@ extend: function() {
 		
 		//notify tethered elements when a dom node is removed
 		document.addEventListener('DOMNodeRemoved', function(ev) {
-			if ( ev.target.__TETHERED__ ) jFresh.tetherNotify(ev.target);
+			if ( ev.target.__TETHERED__ ) xtc.tetherNotify(ev.target);
 			var subs = ev.target.getElementsByClassName ? ev.target.getElementsByClassName('__TETHERED__') : [];
 			for(var i =0; i<subs.length; i++) {
-				jFresh.tetherNotify(subs[i]);
+				xtc.tetherNotify(subs[i]);
 			}
 		});
 
 		document.addEventListener('DOMContentLoaded', function(){
-			if ( !jFresh.startNode ) jFresh.startNode = document.body;
-			$X = jFresh.energize2(jFresh.startNode); //startup our engine...
+			if ( !xtc.startNode ) xtc.startNode = document.body;
+			$X = xtc.energize2(xtc.startNode); //startup our engine...
 		});
 		
 		var defBeforeUnload = window.onbeforeunload;
 		window.onbeforeunload = function() {
 			if ( defBeforeUnload ) defBeforeUnload();
-			for(var i=0; i<jFresh._onBeforeUnloadChain.length; i++) jFresh._onBeforeUnloadChain[i]();
+			for(var i=0; i<xtc._onBeforeUnloadChain.length; i++) xtc._onBeforeUnloadChain[i]();
 		};
 	},
 	
@@ -140,7 +140,7 @@ extend: function() {
 	},
 	
 	onBeforeUnload: function(fn) {
-		jFresh._onBeforeUnloadChain.push(fn);
+		xtc._onBeforeUnloadChain.push(fn);
 	},
 	
 	uuid: function() {
@@ -162,11 +162,11 @@ extend: function() {
 	
 };
 
-jFresh.init();
+xtc.init();
 
 //enable shorthands?! :D
-//~ $ = jFresh;
-//~ $$ = jFresh.fn;
+//~ $ = xtc;
+//~ $$ = xtc.fn;
 
 
 

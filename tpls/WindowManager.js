@@ -1,13 +1,13 @@
 
-jFresh.fn.WindowManager = function(workspace, opts) {
+xtc.fn.WindowManager = function(workspace, opts) {
 	this.el = workspace;
 	this.opts = opts;
 //~ console.log('WTF');
 	if ( workspace.__WindowManager ) return workspace.__WindowManager;
 	workspace.__WindowManager = this;
 	
-	this.el.addEventListener('jFresh.NodeRemoved', function(ev) {
-		console.log('jFresh.NodeRemoved', this,ev.target);
+	this.el.addEventListener('XTC.NodeRemoved', function(ev) {
+		console.log('XTC.NodeRemoved', this,ev.target);
 	},true);
 	
 	var me = this;
@@ -23,7 +23,7 @@ jFresh.fn.WindowManager = function(workspace, opts) {
 		if ( t ) t.window.title = ev.detail;
 	}, true);
 	
-	this.workspace.addEventListener('jFresh.Window', function(ev) {
+	this.workspace.addEventListener('XTC.Window', function(ev) {
 //~ console.log('window event', ev.detail, ev.target.window, ev);
 		if ( ev.detail == 'close' ) {
 			//window going by by! take it off the chains
@@ -73,14 +73,14 @@ jFresh.fn.WindowManager = function(workspace, opts) {
 	me.hookGlobalListeners();
 	window.currentWindowManager = this;
 	
-	this.workspace.addEventListener('Moveable.resize', function(ev) {
+	this.workspace.addEventListener('Movable.resize', function(ev) {
 		if ( !ev.detail ) return;
-		console.log('Moveable.resize', ev.detail);
+		console.log('Movable.resize', ev.detail);
 		if ( ev.detail == 'max' ) ev.target.window.maximize();
 		else ev.target.window.snap( ev.detail );
 	}, true);
 	
-	this.workspace.addEventListener('jFresh.Window.close', function(ev) {
+	this.workspace.addEventListener('XTC.Window.close', function(ev) {
 		console.log('close', ev.detail);
 		var w = ev.detail,
 			idx = me.windows.chain.indexOf(w);
@@ -126,17 +126,17 @@ jFresh.fn.WindowManager = function(workspace, opts) {
 	me.bindKey('Alt+Down', function(ev) { var win = me.getActive(); win.window.minimize({restore: true}); });
 };
 
-jFresh.fn.WindowManager.defaults = {
-	windowTpl: 'jFresh.Window',
+xtc.fn.WindowManager.defaults = {
+	windowTpl: 'XTC.Window',
 }
 
 
-jFresh.fn.WindowManager.prototype.windowFromElement = function(el) {
+xtc.fn.WindowManager.prototype.windowFromElement = function(el) {
 	while(el && !el.classList.contains('wm-window') && el.parentNode ) el = el.parentNode;
 	return el.classList.contains('wm-window') ? el : null;
 };
 
-jFresh.fn.WindowManager.prototype.activateWindow = function(win) {
+xtc.fn.WindowManager.prototype.activateWindow = function(win) {
 	var me = this;
 	//restore window if minimized
 	if ( win.classList.contains('minimized') ) {
@@ -153,16 +153,16 @@ jFresh.fn.WindowManager.prototype.activateWindow = function(win) {
 	this.windows.tabChain.push(win);
 	
 	win.classList.add('active');
-	win.dispatchEvent(new CustomEvent('jFresh.Window', {detail: 'activated'}) );
+	win.dispatchEvent(new CustomEvent('XTC.Window', {detail: 'activated'}) );
 };
 
-jFresh.fn.WindowManager.prototype.getActive = function() {
+xtc.fn.WindowManager.prototype.getActive = function() {
 	return this.windows.tabChain[ this.windows.tabChain.length - 1 ];
 };
 
 
-jFresh.fn.WindowManager.prototype.createWindow = function(args) {
-	var win = jFresh.fn.Template.energize( this.opts.windowTpl, this.el );
+xtc.fn.WindowManager.prototype.createWindow = function(args) {
+	var win = xtc.fn.Template.energize( this.opts.windowTpl, this.el );
 
 	this.windows.chain.push(win);
 	this.activateWindow(win);
@@ -170,7 +170,7 @@ jFresh.fn.WindowManager.prototype.createWindow = function(args) {
 	return win;
 };
 
-jFresh.fn.WindowManager.prototype.hookGlobalListeners = function() {
+xtc.fn.WindowManager.prototype.hookGlobalListeners = function() {
 	if ( window.__WindowManagerHooked__ ) return;
 	window.__WindowManagerHooked__ = true;
 	
@@ -191,14 +191,14 @@ jFresh.fn.WindowManager.prototype.hookGlobalListeners = function() {
 	
 },
 
-jFresh.fn.WindowManager.prototype.bindKey = function( binding, cb, contain, overrideSystem ) {
+xtc.fn.WindowManager.prototype.bindKey = function( binding, cb, contain, overrideSystem ) {
 	var me=this;
 	if ( !me.keyBinds.hasOwnProperty(binding) ) me.keyBinds[binding] = [];
 	me.keyBinds[binding].push([cb, contain]);
 	if ( overrideSystem ) me.overrideSystemKeys[ binding ] = true;
 };
 
-jFresh.fn.WindowManager.prototype.onKeyDown = function( ev ) {
+xtc.fn.WindowManager.prototype.onKeyDown = function( ev ) {
 	var me = this;
 	
 	var key = me.keyNames[ev.keyCode];
@@ -210,7 +210,7 @@ jFresh.fn.WindowManager.prototype.onKeyDown = function( ev ) {
 	}
 }
 
-jFresh.fn.WindowManager.prototype.onKeyUp = function( ev ) {
+xtc.fn.WindowManager.prototype.onKeyUp = function( ev ) {
 	var me = this;
 	
 	var key = me.keyNames[ev.keyCode];
@@ -223,6 +223,8 @@ jFresh.fn.WindowManager.prototype.onKeyUp = function( ev ) {
 	binding = binding.join('+');
 //~ console.log('keyup', binding);
 	if ( me.keyBinds.hasOwnProperty(binding) ) {
+//~ console.log('keyup found', binding);
+
 		var bs = me.keyBinds[binding];
 		var isCancel;
 		for(var i=0; i<bs.length && (!bs[i][1] || bs[i][1].contains(ev.target) ) && (isCancel=bs[i][0](ev))!==false; i++);

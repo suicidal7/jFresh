@@ -1,4 +1,4 @@
-jFresh.fn.SocketIO = function( el, opts ) {
+xtc.fn.SocketIO = function( el, opts ) {
 	var me = this;
 	this.el = el;
 	this.opts = opts;
@@ -11,7 +11,7 @@ jFresh.fn.SocketIO = function( el, opts ) {
 	this.is_open = false;
 	
 	el.tether(function() { me.skt.disconnect(); });
-	jFresh.onBeforeUnload(function() { me.skt.disconnect(); });
+	xtc.onBeforeUnload(function() { me.skt.disconnect(); });
 	
 	
 	var serveCallbacks = function( key, data ) {
@@ -34,9 +34,11 @@ jFresh.fn.SocketIO = function( el, opts ) {
 	});
 	
 	me.skt.on('sessionKey', function(nfo) {
-		jFresh.setCookie('UKEY', nfo.key);
+		xtc.setCookie('UKEY', nfo.key);
 		localStorage.userKey = nfo.key;
 		localStorage.user = nfo.user;
+		localStorage.userHome = nfo.home;
+		
 		me.is_open = true;
 		me.el.parent(me.opts.authRoot).classList.remove( me.opts.authClass );
 		serveCallbacks('sessionKey', nfo);
@@ -79,22 +81,22 @@ console.log('dispatching ready event on', me.el);
 	//~ return skt;
 };
 
-jFresh.fn.SocketIO.defaults = {
+xtc.fn.SocketIO.defaults = {
 	'host': document.location.origin.replace('http://','ws://').replace('https://','wss://'),
 	authRoot: '.desktop-wrapper', //el.parent(authRoot)
 	authClass: 'login-required'
 };
 
-jFresh.fn.SocketIO.prototype.on = function(cmd, cb) {
+xtc.fn.SocketIO.prototype.on = function(cmd, cb) {
 	if ( !this._callbacks.hasOwnProperty(cmd) ) this._callbacks[cmd] = [];
 	this._callbacks[cmd].push(cb);
 };
 
-jFresh.fn.SocketIO.prototype.login = function(user, pwd) {
+xtc.fn.SocketIO.prototype.login = function(user, pwd) {
 	this.skt.emit('login', user, pwd);
 };
 
-jFresh.fn.SocketIO.prototype.send = function(cmd, data, cb) {
+xtc.fn.SocketIO.prototype.send = function(cmd, data, cb) {
 	if ( ! this.is_open ) {
 		this._queue.push([cmd,data,cb]);
 		return;

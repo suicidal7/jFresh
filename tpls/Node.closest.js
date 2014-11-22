@@ -10,6 +10,11 @@ Node.prototype.closest = function(sel) {
 	return p.matches(sel) ? p : p.querySelector(sel);
 };
 
+Node.prototype.nearest = function(sel,shadowBreak) {
+	for(var p=this; (!p.matches || !p.matches(sel)) && (p.parentNode || (shadowBreak && p.host)); p = p.host ? p.host : p.parentNode) {}
+	if ( p.matches && p.matches(sel) ) return p;
+};
+
 Node.prototype.parent = function(sel) {
 	var p = this;
 	while(!p.matches(sel) && p.parentNode && p.parentNode.matches && p.parentNode.tagName!='HTML') p = p.parentNode;
@@ -98,7 +103,7 @@ Node.prototype.fireEvent = function(event, udata){
 
 
 Node.prototype.position = function(args) {
-	var opts = jFresh.extend(true, {
+	var opts = xtc.extend(true, {
 		my: 'top left',
 		at: 'top left',
 		of: ''

@@ -34,14 +34,14 @@
 
 
 
-jFresh.fn.MakeItRain = function(el, opts) {
+xtc.fn.MakeItRain = function(el, opts) {
 	this.el = el;
 	this.opts = opts;
 	var canv = document.createElement('canvas');
 	
 	el.insertBefore(canv, el.firstChild);
 	
-	jFresh.extend(this, {
+	xtc.extend(this, {
 		settings: {
 			COL_WIDTH: 20,
 			COL_HEIGHT: 25,
@@ -100,7 +100,7 @@ jFresh.fn.MakeItRain = function(el, opts) {
 	this.init();
 };
 
-jFresh.fn.MakeItRain.prototype = {
+xtc.fn.MakeItRain.prototype = {
 	init: function() {
 		var M = this;
 //~ console.log('SETT', this.c, this.c.getContext);

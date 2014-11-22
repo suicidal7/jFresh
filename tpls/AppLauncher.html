@@ -1,6 +1,6 @@
 <script type="text/javascript">
 
-jFresh.fn.AppLauncher = function(el, opts) {
+xtc.fn.AppLauncher = function(el, opts) {
 	var me  = this;
 	this.opts  = opts;
 	this.el = el;
@@ -25,29 +25,29 @@ jFresh.fn.AppLauncher = function(el, opts) {
 	
 	var me = this;
 	setTimeout(function() {
-		me.launch('jFresh.Demo');
-		//~ me.launch('jFresh.Demo');
+		me.launch('XTC.xEditor');
+		//~ me.launch('xtc.Demo');
 	}, 500);
 	return this;
 };
 
-jFresh.fn.AppLauncher.uids = 1;
+xtc.fn.AppLauncher.uids = 1;
 
-jFresh.fn.AppLauncher.defaults = {
+xtc.fn.AppLauncher.defaults = {
 	manager: null, //defaults to this.el, otherwise this.el.closest(manager)
 	appClass: 'app-icon-', //what to prepend to class added to item based on app name
 	sktEl: '.SocketIO', //this.el.closest(sktEl)
 };
 
-jFresh.fn.AppLauncher.prototype.launch = function(appId, appArgs) {
+xtc.fn.AppLauncher.prototype.launch = function(appId, appArgs) {
 	//appId is basically a templateId
 	var win = this.wm.createWindow();
 //~ console.log('window', win, win.window);
-	var title = appId.substr('jFresh.'.length);
+	var title = appId.substr('XTC.'.length);
 	win.window.__app = {
 		id: appId,
-		title: jFresh.fn[title].appInfo.title,
-		uid: 'app-'+(jFresh.fn.AppLauncher.uids++),
+		title: xtc.fn[title].appInfo.title,
+		uid: 'app-'+(xtc.fn.AppLauncher.uids++),
 	};
 	win.window.icon = this.opts.appClass+title;
 	win.window.title = win.window.__app.title;
@@ -88,7 +88,7 @@ jFresh.fn.AppLauncher.prototype.launch = function(appId, appArgs) {
 	
 };
 
-jFresh.fn.AppLauncher.prototype.launchFile = function(file, stat) {
+xtc.fn.AppLauncher.prototype.launchFile = function(file, stat) {
 	var me = this;
 	
 		var onStat = function(res) {
@@ -105,7 +105,7 @@ console.log('Applaunch ftype', mtype);
 			}
 			
 			var app;
-			if ( (app = jFresh.typeAssociations[mtype]) || (app = jFresh.typeAssociations[ gtype ]) ) {
+			if ( (app = xtc.typeAssociations[mtype]) || (app = xtc.typeAssociations[ gtype ]) ) {
 				console.log('Launching associated app: ', mtype, app);
 				me.launch(app, file);
 			}

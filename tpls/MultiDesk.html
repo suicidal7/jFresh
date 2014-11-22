@@ -21,17 +21,17 @@
 
 </style>
 
-<template id="jFresh.MultiDesk">
+<template id="XTC.MultiDesk">
 	<div class="multi-desks expose" fn="MultiDesk">
-		<div fn="Template" Template-id="jFresh.Desktop" class="active"></div>
-		<div fn="Template" Template-id="jFresh.Desktop"></div>
-		<div fn="Template" Template-id="jFresh.Desktop"></div>
-		<div fn="Template" Template-id="jFresh.Desktop"></div>
+		<div fn="Template" Template-id="XTC.Desktop" class="active"></div>
+		<div fn="Template" Template-id="XTC.Desktop"></div>
+		<div fn="Template" Template-id="XTC.Desktop"></div>
+		<div fn="Template" Template-id="XTC.Desktop"></div>
 	</div>
 </template>
 
 <script type="text/javascript">
-jFresh.fn.MultiDesk = function(root) {
+xtc.fn.MultiDesk = function(root) {
 	var me = this;
 	this.el = root;
 	
@@ -67,7 +67,7 @@ jFresh.fn.MultiDesk = function(root) {
 		//~ return;
 	//~ }
 //~ $desk = this;
-	//~ var tpl = document.getElementById('jFresh.MultiDesk');
+	//~ var tpl = document.getElementById('XTC.MultiDesk');
 	//~ var dolly = tpl.content.cloneNode(true);
 	//~ this.el = dolly.children[0];
 	//~ this.el.multiDesk = this;
@@ -77,7 +77,7 @@ jFresh.fn.MultiDesk = function(root) {
 	//~ var desks = this.el.querySelectorAll('.desktop');
 	//~ this.desks = [];
 	//~ for(var i=0; i<desks.length; i++) {
-		//~ this.desks.push( new jFresh.fn.Desktop(desks[i]) );
+		//~ this.desks.push( new xtc.fn.Desktop(desks[i]) );
 	//~ }
 	
 	

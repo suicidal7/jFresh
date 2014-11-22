@@ -47,14 +47,14 @@
 </style>
 
 
-<template id="jFresh.FileExplorer">
+<template id="XTC.FileExplorer">
 	<div fn="FileExplorer">
-		<header fn="Template" Template-id="jFresh.FileExplorer.LocationBar" FileExplorer_LocationBar-sktEl=".FileExplorer"></header>
+		<header fn="Template" Template-id="XTC.FileExplorer.LocationBar" FileExplorer_LocationBar-sktEl=".FileExplorer"></header>
 		<article>
 			<div fn="Resizable" Resizable-which="e" class="FileExplorer_Places-wrapper">
 				<ul fn="FileExplorer_Places"></ul>
 			</div>
-			<section fn="Template" Template-id="jFresh.FileExplorer.FilesView" FileExplorer_FilesView-sktEl=".FileExplorer">
+			<section fn="Template" Template-id="XTC.FileExplorer.FilesView" FileExplorer_FilesView-sktEl=".FileExplorer">
 			</section>
 		</article>
 	</div>
@@ -62,7 +62,7 @@
 
 <script type="text/javascript">
 
-jFresh.fn.FileExplorer = function(el, opts) {
+xtc.fn.FileExplorer = function(el, opts) {
 	this.el = el;
 	this.opts = opts;
 	var me = this;
@@ -133,16 +133,16 @@ jFresh.fn.FileExplorer = function(el, opts) {
 	me.launcher = me.opts.launcherEl ? me.el.closest( me.opts.launcherEl ) : me.el;
 };
 
-jFresh.fn.FileExplorer.defaults = {
+xtc.fn.FileExplorer.defaults = {
 	sktEl: '.SocketIO', //this.el.closest(sktEl)
 	launcherEl: '.AppLauncher',//this.el.closest(launcherEl)
 };
 
-jFresh.fn.FileExplorer.appInfo = {
+xtc.fn.FileExplorer.appInfo = {
 	title: 'FileExplorer',
 };
 
-jFresh.fn.FileExplorer.prototype = {
+xtc.fn.FileExplorer.prototype = {
 	val: function(v, stat) {
 		if ( !arguments.length ) return this._val;
 		

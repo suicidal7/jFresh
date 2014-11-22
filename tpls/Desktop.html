@@ -305,7 +305,7 @@ nav .selected {
 	z-index: 2;
 }
 
-.moveable-highligher {
+.movable-highligher {
 	background-color: rgba(0,0,200,0.5);
 	z-index: 10;
 }
@@ -353,30 +353,30 @@ a:focus {
 
 </style>
 
-<template id="jFresh.Icon">
+<template id="XTC.Icon">
 	<div class="icon-sheen"></div>
 </template>
 
-<template id="jFresh.Desktop">
+<template id="XTC.Desktop">
 	<div class="desktop-wrapper" fn="SocketIO Desktop RotateWallpaper" fn-disabled="MakeItRain">
 		<div class="workspace" fn="WindowManager AppLauncher">
 		</div>
 		<div class="taskbar" fn="Taskbar" Taskbar-manager="">
 			<div fn="IconButton" class="i48 apps-list"></div>
-			<div class="AppsList-wrapper" fn="Popup" Template-id="jFresh.AppsList" Popup-handle=".taskbar>.apps-list" Popup-location="bottom left,top left">
-				<ul fn="AppsList" class="AppsList" AppsList-itemTpl="jFresh.AppsList.item" AppsList-launcher=".desktop-wrapper>.workspace">
-				<template id="jFresh.AppsList.item">
+			<div class="AppsList-wrapper" fn="Popup" Template-id="XTC.AppsList" Popup-handle=".taskbar>.apps-list" Popup-location="bottom left,top left">
+				<ul fn="AppsList" class="AppsList" AppsList-itemTpl="XTC.AppsList.item" AppsList-launcher=".desktop-wrapper>.workspace">
+				<template id="XTC.AppsList.item">
 					<li class="i48" fn="AppsListItem IconButton"></li>
 				</template>
 				</ul>
 			</div>
-			<ul class="WindowsList" fn="WindowsList" WindowsList-manager=".desktop-wrapper>.workspace" WindowsList-itemTpl="jFresh.WindowsList.item">
-				<template id="jFresh.WindowsList.item">
+			<ul class="WindowsList" fn="WindowsList" WindowsList-manager=".desktop-wrapper>.workspace" WindowsList-itemTpl="XTC.WindowsList.item">
+				<template id="XTC.WindowsList.item">
 					<li class="i48" fn="WindowsListItem IconButton"></li>
 				</template>
 			</ul>
 			
-			<div fn="IconButton" class="i48 red-rabbit" onclick="var e = document.querySelector('.desktop-wrapper'); if (!e.makeItRain) e.makeItRain = new jFresh.fn.MakeItRain(e); this.hide();"></div>
+			<div fn="IconButton" class="i48 red-rabbit" onclick="var e = document.querySelector('.desktop-wrapper'); if (!e.makeItRain) e.makeItRain = new xtc.fn.MakeItRain(e); this.hide();"></div>
 		</div>
 		
 		<div class="desktop-login-wrapper" fn="xLogin" xLogin-skt=".desktop-wrapper">
@@ -396,7 +396,7 @@ a:focus {
 
 
 
-jFresh.fn.Desktop = function(el, opts) {
+xtc.fn.Desktop = function(el, opts) {
 	var me = this;
 	me.el = el;
 	me.opts = opts;
@@ -426,7 +426,7 @@ jFresh.fn.Desktop = function(el, opts) {
 	}, true);*/
 };
 
-jFresh.fn.xLogin = function(el, opts) {
+xtc.fn.xLogin = function(el, opts) {
 	var me = this;
 	this.el = el;
 	this.opts = opts;
@@ -452,11 +452,11 @@ jFresh.fn.xLogin = function(el, opts) {
 
 };
 
-jFresh.fn.xLogin.defaults = {
+xtc.fn.xLogin.defaults = {
 	skt: ''
 };
 
-jFresh.fn.xLogin.prototype.show = function() {
+xtc.fn.xLogin.prototype.show = function() {
 	this.el.show();
 };
 
@@ -464,10 +464,10 @@ jFresh.fn.xLogin.prototype.show = function() {
 
 
 
-jFresh.fn.IconButton = function(el, opts) {
+xtc.fn.IconButton = function(el, opts) {
 	this.el = el;
 	this.opts = opts;
-	jFresh.fn.Template.energize('jFresh.Icon', el);
+	xtc.fn.Template.energize('XTC.Icon', el);
 	this.el.classList.add('icon');
 	this.el.classList.add('icon-button');
 };

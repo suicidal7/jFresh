@@ -131,7 +131,7 @@
 
 </style>
 
-<template id="jFresh.FileExplorer.FilesView">
+<template id="XTC.FileExplorer.FilesView">
 	<table fn="Table FixedHeaderTable FileExplorer_FilesView" Table-allowSelect="2">
 <colgroup>
     <col style="width:60%">
@@ -154,7 +154,7 @@
 
 
 
-jFresh.fn.FileExplorer_FilesView = function(el, opts) {
+xtc.fn.FileExplorer_FilesView = function(el, opts) {
 	this.el = el;
 	this.opts = opts;
 	var me = this;
@@ -204,19 +204,19 @@ jFresh.fn.FileExplorer_FilesView = function(el, opts) {
 
 };
 
-jFresh.fn.FileExplorer_FilesView.defaults = {
+xtc.fn.FileExplorer_FilesView.defaults = {
 	sktEl: '',
 };
 
-jFresh.fn.FileExplorer_FilesView.prototype = {
+xtc.fn.FileExplorer_FilesView.prototype = {
 	loadMimeTypeImgs: function() {
 		var me = this;
 		//todo: maybe move this somewhere more generic & runs after login?!
-		if ( !jFresh.__mimeTypeImgs ) {
-			jFresh.__mimeTypeImgs = [];
+		if ( !xtc.__mimeTypeImgs ) {
+			xtc.__mimeTypeImgs = [];
 			me.socketIO.send('js', [ 'fs.glob', './public/imgs/mimetypes/48px', {filter: '*.png'} ], function(res) {
 				for(var i=0; i<res.d.length; i++) {
-					jFresh.__mimeTypeImgs.push( res.d[i].substr(0, res.d[i].length-4 ) );
+					xtc.__mimeTypeImgs.push( res.d[i].substr(0, res.d[i].length-4 ) );
 				}
 			});
 		}
@@ -305,7 +305,7 @@ jFresh.fn.FileExplorer_FilesView.prototype = {
 		ins.classList.add('i24');
 		var ext = fsTools.ext(file.name);
 
-		if ( file.type == 'file' && ext && jFresh.__mimeTypeImgs.indexOf( ext )>-1 ) ins.style.backgroundImage = "url('imgs/mimetypes/48px/"+ext+".png')";
+		if ( file.type == 'file' && ext && xtc.__mimeTypeImgs.indexOf( ext )>-1 ) ins.style.backgroundImage = "url('imgs/mimetypes/48px/"+ext+".png')";
 		else if ( file.type == 'folder' ) ins.classList.add('folder');
 		else if ( file.type == 'symlink' ) {
 			var subIns = document.createElement('ins');

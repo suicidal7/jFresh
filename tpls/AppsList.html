@@ -19,17 +19,17 @@
 
 <script type="text/javascript">
 
-jFresh.fn.AppsListItem = function(el, opts) {
+xtc.fn.AppsListItem = function(el, opts) {
 	this.el = el;
 	this.opts = opts;
 };
 
-jFresh.fn.AppsListItem.defaults = {
+xtc.fn.AppsListItem.defaults = {
 	appClass: 'app-icon-', //what to prepend to class added to item based on app name
 	appTitle: '', //element to fill with app title el.innerHTML=title
 };
 
-jFresh.fn.AppsListItem.prototype.setApp = function(app) {
+xtc.fn.AppsListItem.prototype.setApp = function(app) {
 	this.el.classList.add(this.opts.appClass+app);
 	if (this.opts.appTitle) {
 		var e = this.el.closest(this.opts.appTitle);
@@ -37,16 +37,16 @@ jFresh.fn.AppsListItem.prototype.setApp = function(app) {
 	}
 };
 
-jFresh.fn.AppsList = function(el, opts) {
+xtc.fn.AppsList = function(el, opts) {
 	var me = this;
 	this.el = el;
 	this.opts = opts;
 	
 	var li;
-	for(var app in jFresh.fn) {
-		if ( !jFresh.fn.hasOwnProperty(app) || !jFresh.fn[app].hasOwnProperty('appInfo') ) continue;
-		li = jFresh.fn.Template.energize( this.opts.itemTpl, this.el );
-		li.setAttribute('app-link', 'jFresh.'+app);
+	for(var app in xtc.fn) {
+		if ( !xtc.fn.hasOwnProperty(app) || !xtc.fn[app].hasOwnProperty('appInfo') ) continue;
+		li = xtc.fn.Template.energize( this.opts.itemTpl, this.el );
+		li.setAttribute('app-link', 'XTC.'+app);
 		li.appsListItem.setApp( app );
 	}
 	
@@ -57,8 +57,8 @@ jFresh.fn.AppsList = function(el, opts) {
 	});
 };
 
-jFresh.fn.AppsList.defaults = {
-	itemTpl: 'jFresh.AppsList.item',
+xtc.fn.AppsList.defaults = {
+	itemTpl: 'XTC.AppsList.item',
 	launcher: '',
 };
 

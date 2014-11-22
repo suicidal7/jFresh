@@ -1,4 +1,4 @@
-jFresh.fn.RotateWallpaper = function(el, opts) {
+xtc.fn.RotateWallpaper = function(el, opts) {
 	var me = this;
 	me.el = el;
 	me.opts = opts;
@@ -30,7 +30,8 @@ jFresh.fn.RotateWallpaper = function(el, opts) {
 	
 //~ setTimeout(function() {
 	//request files list
-	document.getElementsByClassName('SocketIO')[0].socketIO.send('js', ['fs.glob', './public/imgs/wallpapers'], function(res) {
+	document.getElementsByClassName('SocketIO')[0].socketIO.send('js', ['fs.glob', localStorage.userHome+'/Pictures/Wallpapers'], function(res) {
+		if ( !res || !res.d ) return;
 		//~ console.log( 'wpapers', res.d );
 		me.wallPapers = res.d;
 		shuffle(me.wallPapers);
@@ -44,6 +45,6 @@ jFresh.fn.RotateWallpaper = function(el, opts) {
 //~ }, 1000);
 };
 
-jFresh.fn.RotateWallpaper.prototype.rotate = function() {
+xtc.fn.RotateWallpaper.prototype.rotate = function() {
 	this.el.style.backgroundImage="url('imgs/wallpapers/"+(me.wallPapers[me.idx++])+"')";
 };

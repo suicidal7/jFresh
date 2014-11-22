@@ -9,15 +9,15 @@
 
 </style>
 
-<template id="jFresh.Table.thWrapper">
+<template id="XTC.Table.thWrapper">
 	<th><span></span></th>
 </template>
 
-<template id="jFresh.Table.trWrapper">
+<template id="XTC.Table.trWrapper">
 	<tr></tr>
 </template>
 
-<template id="jFresh.Table.tdWrapper">
+<template id="XTC.Table.tdWrapper">
 	<td></td>
 </template>
 
@@ -25,7 +25,7 @@
 <script type="text/javascript">
 
 
-jFresh.fn.Table = function(el, opts) {
+xtc.fn.Table = function(el, opts) {
 	this.el = el;
 	this.opts = opts;
 	this.colsOrder = [];
@@ -50,7 +50,7 @@ jFresh.fn.Table = function(el, opts) {
 			opts.cols[col.name] = col;
 			opts.cols[col.idx] = col;
 			//replace this tr with a new skinned one!
-			var colEl = jFresh.fn.Template.energize( this.opts.thTpl, this.el );
+			var colEl = xtc.fn.Template.energize( this.opts.thTpl, this.el );
 			colEl.querySelector(this.opts.thTitle).innerHTML = col.title;
 			tr.insertBefore(colEl, th);
 			th.remove();
@@ -67,10 +67,10 @@ jFresh.fn.Table = function(el, opts) {
 	
 };
 
-jFresh.fn.Table.defaults = {
-	thTpl: 'jFresh.Table.thWrapper',
-	trTpl: 'jFresh.Table.trWrapper',
-	tdTpl: 'jFresh.Table.tdWrapper',
+xtc.fn.Table.defaults = {
+	thTpl: 'XTC.Table.thWrapper',
+	trTpl: 'XTC.Table.trWrapper',
+	tdTpl: 'XTC.Table.tdWrapper',
 	theadSel: 'thead>tr', //el.querySelector(theadSel)  (after that we used .children for thead columns)
 	tbodySel: 'tbody', //el.querySelector(tbodySel)  (after that we used .children for rows)
 	tdSel: '', //tbodySel.children[i].querySelector(tdSel) only needed when cells are wrapped inside a row
@@ -80,7 +80,7 @@ jFresh.fn.Table.defaults = {
 };
 
 //global hooks to apply for all Table elements!
-jFresh.fn.Table.globalHooks = function() {
+xtc.fn.Table.globalHooks = function() {
 	document.addEventListener('click', function(ev) {
 		//make sure we clicked a relevant TR
 		var tr = ev.target;
@@ -106,7 +106,7 @@ jFresh.fn.Table.globalHooks = function() {
 	});
 };
 
-jFresh.fn.Table.prototype.onScroll = function(ev) {
+xtc.fn.Table.prototype.onScroll = function(ev) {
 	var me = this;
 	if (!me.dataRows) return;
 	
@@ -117,7 +117,7 @@ jFresh.fn.Table.prototype.onScroll = function(ev) {
 
 };
 
-jFresh.fn.Table.prototype.onClickRow = function(ev) {
+xtc.fn.Table.prototype.onClickRow = function(ev) {
 	if ( !this.opts.allowSelect ) return;
 	var me = this;
 	
@@ -132,7 +132,7 @@ jFresh.fn.Table.prototype.onClickRow = function(ev) {
 	return false;
 };
 
-jFresh.fn.Table.prototype.hideCol = function(colName, hide) { //hide=true/false
+xtc.fn.Table.prototype.hideCol = function(colName, hide) { //hide=true/false
 	hide = hide ? 'hide' : 'show';
 	var idx = this.colsOrder.indexOf(colName);
 	if ( idx<0 ) return;
@@ -150,16 +150,16 @@ jFresh.fn.Table.prototype.hideCol = function(colName, hide) { //hide=true/false
 	}
 };
 
-jFresh.fn.Table.prototype.addRow = function(row, uid) {
+xtc.fn.Table.prototype.addRow = function(row, uid) {
 	var tr;
-	tr = jFresh.fn.Template.energize( this.opts.trTpl, this.tbody );
+	tr = xtc.fn.Template.energize( this.opts.trTpl, this.tbody );
 	if (uid) tr.setAttribute('data-uid', uid);
 	if ( this.opts.tdSel ) tr = tr.querySelector(this.opts.tdSel);
 	
 	var type = row instanceof Array ? 0 : 1; //array or object
 	
 	for(var c=0; c<this.colsOrder.length; c++) {
-		var td = jFresh.fn.Template.energize( this.opts.tdTpl, tr );
+		var td = xtc.fn.Template.energize( this.opts.tdTpl, tr );
 		if ( this.opts.tdTitle ) td = td.querySelector(this.opts.tdTitle);
 		if (td) {
 			var col = this.opts.cols[ this.colsOrder[c] ];
@@ -175,14 +175,14 @@ jFresh.fn.Table.prototype.addRow = function(row, uid) {
 
 //set a large number of rows, will progressively load them
 // calling onAddRow (if someone is hooked to it) after each on scroll
-jFresh.fn.Table.prototype.setRows = function(rows) {
+xtc.fn.Table.prototype.setRows = function(rows) {
 	var me =  this;
 	me.dataRows = rows;
 	me._dataIdx = 0;
 	me._loadNextBatch();
 };
 
-jFresh.fn.Table.prototype._loadNextBatch = function() {
+xtc.fn.Table.prototype._loadNextBatch = function() {
 	var me = this;
 	
 	if ( !me.dataRows || me.dataRows.length== me._dataIdx ) {

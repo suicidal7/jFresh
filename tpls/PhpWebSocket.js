@@ -1,10 +1,10 @@
-jFresh.fn.PhpWebSocket = function( el, opts ) {
+xtc.fn.PhpWebSocket = function( el, opts ) {
 	//extend WebSocket
 	this.opts = opts;
 	var skt = new WebSocket(this.opts.host);
-	for( var fn in jFresh.fn.PhpWebSocket.prototype ) {
-		if (!jFresh.fn.PhpWebSocket.prototype.hasOwnProperty(fn)) continue;
-		skt[ fn ] = jFresh.fn.PhpWebSocket.prototype[fn];
+	for( var fn in xtc.fn.PhpWebSocket.prototype ) {
+		if (!xtc.fn.PhpWebSocket.prototype.hasOwnProperty(fn)) continue;
+		skt[ fn ] = xtc.fn.PhpWebSocket.prototype[fn];
 	}
 	
 	skt.is_open = false;
@@ -24,11 +24,11 @@ jFresh.fn.PhpWebSocket = function( el, opts ) {
 	return skt;
 }
 
-jFresh.fn.PhpWebSocket.defaults = {
+xtc.fn.PhpWebSocket.defaults = {
 	'host': '',
 };
 
-jFresh.fn.PhpWebSocket.prototype.onopen = function() {
+xtc.fn.PhpWebSocket.prototype.onopen = function() {
 	//handshake / auth
 	
 	//resend any queued msgs?
@@ -46,7 +46,7 @@ jFresh.fn.PhpWebSocket.prototype.onopen = function() {
 
 };
 
-jFresh.fn.PhpWebSocket.prototype.onclose = function() {
+xtc.fn.PhpWebSocket.prototype.onclose = function() {
 	console.log('PhpWebSocket CLOSED', arguments);
 	//TODO: reconnect
 	
@@ -58,7 +58,7 @@ jFresh.fn.PhpWebSocket.prototype.onclose = function() {
 
 };
 
-jFresh.fn.PhpWebSocket.prototype.onerror = function() {
+xtc.fn.PhpWebSocket.prototype.onerror = function() {
 	console.log('PhpWebSocket ERROR', arguments);
 	//TODO: reconnect?
 	
@@ -68,7 +68,7 @@ jFresh.fn.PhpWebSocket.prototype.onerror = function() {
 
 };
 
-jFresh.fn.PhpWebSocket.prototype.onmessage = function(msg) {
+xtc.fn.PhpWebSocket.prototype.onmessage = function(msg) {
 	var json = JSON.parse( msg.data );
 	if ( this.callbacks.hasOwnProperty( json.uid ) ) {
 		var cb, 
@@ -91,17 +91,17 @@ jFresh.fn.PhpWebSocket.prototype.onmessage = function(msg) {
 	}
 };
 
-jFresh.fn.PhpWebSocket.prototype.unlisten = function(fn) {
+xtc.fn.PhpWebSocket.prototype.unlisten = function(fn) {
 	var idx = this.listeners.indexOf(fn);
 	if ( idx >= 0 ) this.listeners.splice(idx, 1);
 };
 
-jFresh.fn.PhpWebSocket.prototype.listen = function(fn) {
+xtc.fn.PhpWebSocket.prototype.listen = function(fn) {
 	if ( this.listeners.indexOf(fn) >= 0 ) return;
 	this.listeners.push(fn);
 };
 
-jFresh.fn.PhpWebSocket.prototype.exec = function() {
+xtc.fn.PhpWebSocket.prototype.exec = function() {
 	var args = Array.prototype.slice.call(arguments);
 
 	var fn = args.shift();

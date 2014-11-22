@@ -231,7 +231,7 @@
 
 </style>
 
-<template id="jFresh.Window">
+<template id="XTC.Window">
 <div class="wm-window" fn="Window Resizable">
 	<header>
 		<span class="icon i24"></span>
@@ -250,13 +250,13 @@
 </template>
 
 <script type="text/javascript">
-jFresh.fn.Window = function(el, opts) {
+xtc.fn.Window = function(el, opts) {
 	this.opts = opts;
 	this.el = el;
-	this._uid = 'win-'+jFresh.fn.Window.uids++;
+	this._uid = 'win-'+xtc.fn.Window.uids++;
 	var me = this;
 	
-	/*this.opts = jFresh.extend(true,{
+	/*this.opts = xtc.extend(true,{
 		minimize: 1,
 		maximize: 1,
 		close: 1,
@@ -272,7 +272,7 @@ jFresh.fn.Window = function(el, opts) {
 
 	//~ this.manager = manager;
 	
-	el.moveable({handle: this.opts.headerEl, container: this.el.parentNode});
+	el.movable({handle: this.opts.headerEl, container: this.el.parentNode});
 	this.contentEl = this.el.closest( this.opts.contentEl );
 	this.title = this.opts.title;
 	this.content = this.opts.content;
@@ -296,9 +296,9 @@ jFresh.fn.Window = function(el, opts) {
 	
 }
 
-jFresh.fn.Window.uids = 1;
+xtc.fn.Window.uids = 1;
 
-jFresh.fn.Window.defaults = {
+xtc.fn.Window.defaults = {
 	title: 'New Window',
 	content: '<h2>Jello World?! O.o</h2>',
 	icon: '',
@@ -312,14 +312,14 @@ jFresh.fn.Window.defaults = {
 	minimizeTo: 'bottom-center', //or element
 };
 
-jFresh.fn.Window.globalHooks = function() {
+xtc.fn.Window.globalHooks = function() {
 	document.addEventListener('Resize.start', function(ev) {
 		if ( ev.target.classList.contains('snapped') ) ev.target.window.unsnap(true);
 	}, true);
 };
 
 
-jFresh.fn.Window.prototype = {
+xtc.fn.Window.prototype = {
 	get content() { 
 		return this.contentElChild;
 	},
@@ -327,7 +327,7 @@ jFresh.fn.Window.prototype = {
 	//~ console.log('Window.setContent', content);
 		this.contentEl.innerHTML = '';
 		if ( typeof(c)=='string' ) { //consider it a template?
-			if (!(this.contentElChild = jFresh.fn.Template.energize(c, this.contentEl))) {
+			if (!(this.contentElChild = xtc.fn.Template.energize(c, this.contentEl))) {
 				this.contentEl.innerHTML = c;
 				this.contentElChild = this.contentEl;
 			}
@@ -342,7 +342,7 @@ jFresh.fn.Window.prototype = {
 		//TODO: fix me to be something else than innerHTML
 		this.el.closest( this.opts.titleEl ).innerHTML = t;
 		
-		this.el.dispatchEvent(new CustomEvent('jFresh.Window', {detail: 'title'}) );
+		this.el.dispatchEvent(new CustomEvent('XTC.Window', {detail: 'title'}) );
 	},
 	get title() { 
 		return this.opts.title; 
@@ -354,7 +354,7 @@ jFresh.fn.Window.prototype = {
 		this.opts.icon = i; 
 		var e = this.el.closest(this.opts.iconEl); 
 		if (e) e.classList.add(i);
-		this.el.dispatchEvent(new CustomEvent('jFresh.Window', {detail: 'icon'}) );
+		this.el.dispatchEvent(new CustomEvent('XTC.Window', {detail: 'icon'}) );
 	},
 	get minimizeTo() {
 		return this.opts.minimizeTo;
@@ -365,8 +365,8 @@ jFresh.fn.Window.prototype = {
 };
 
 
-jFresh.fn.Window.prototype.minimize = function(args) {
-	var opts = jFresh.extend(true,{
+xtc.fn.Window.prototype.minimize = function(args) {
+	var opts = xtc.extend(true,{
 		'towards': this.opts.minimizeTo, //of workspace - or give DOM element
 		'restore': false, //try to restore window state first (maximized/snapped)
 		}, args);
@@ -398,7 +398,7 @@ jFresh.fn.Window.prototype.minimize = function(args) {
 			win.style[k] = win.__minimizeWindow[k]
 		}
 		delete win.__minimizeWindow;
-		win.dispatchEvent(new CustomEvent('jFresh.Window', {detail: 'restored'}) );
+		win.dispatchEvent(new CustomEvent('XTC.Window', {detail: 'restored'}) );
 	}
 	else {
 		var x,y;
@@ -424,12 +424,12 @@ jFresh.fn.Window.prototype.minimize = function(args) {
 		}
 		win.classList.add('minimized');
 		win.__minimizeWindow['transform']='';
-		win.dispatchEvent(new CustomEvent('jFresh.Window', {detail: 'minimized'}) );
+		win.dispatchEvent(new CustomEvent('XTC.Window', {detail: 'minimized'}) );
 	}
 	
 };
 
-jFresh.fn.Window.prototype.maximize = function(forced) {
+xtc.fn.Window.prototype.maximize = function(forced) {
 	var win = this.el;
 	
 console.log('window max EL', win);
@@ -442,33 +442,33 @@ console.log('window max', win.__maximizeWindow);
 		win.style.left = win.__maximizeWindow.left;
 		win.style.top = win.__maximizeWindow.top;
 		delete win.__maximizeWindow;
-		win.dispatchEvent(new CustomEvent('jFresh.Window', {detail: 'restored'}) );
+		win.dispatchEvent(new CustomEvent('XTC.Window', {detail: 'restored'}) );
 	}
 	else {
 		win.__maximizeWindow = {left: win.style.left, top: win.style.top };
 		win.style.left = 0;
 		win.style.top = 0;
 		win.classList.add('maximized');
-		win.dispatchEvent(new CustomEvent('jFresh.Window', {detail: 'maximized'}) );
+		win.dispatchEvent(new CustomEvent('XTC.Window', {detail: 'maximized'}) );
 	}
 };
 
-jFresh.fn.Window.prototype.restore = function() {
+xtc.fn.Window.prototype.restore = function() {
 	var win = this.el;
 	if ( win.__minimizeWindow ) this.minimize();
 	else if ( win.__maximizeWindow ) this.maximize();
 };
 
-jFresh.fn.Window.prototype.close = function() {
+xtc.fn.Window.prototype.close = function() {
 	var win = this.el;
-	win.dispatchEvent(new CustomEvent('jFresh.Window', {detail: 'close'}) );
+	win.dispatchEvent(new CustomEvent('XTC.Window', {detail: 'close'}) );
 	
 	win.animateClass('closing', function() {
 		win.remove();
 	});
 };
 
-jFresh.fn.Window.prototype.unsnap = function(keepSnapPos) {
+xtc.fn.Window.prototype.unsnap = function(keepSnapPos) {
 	var me = this, win=me.el;
 	
 	win.animateClass('maximizing');
@@ -486,7 +486,7 @@ jFresh.fn.Window.prototype.unsnap = function(keepSnapPos) {
 	delete me.__savedSnapPos;
 };
 
-jFresh.fn.Window.prototype.snap = function(dir) {
+xtc.fn.Window.prototype.snap = function(dir) {
 	var me = this;
 	var win = this.el;
 	

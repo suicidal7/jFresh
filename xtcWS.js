@@ -39,7 +39,7 @@ fs.glob = function(path, _opts) {
 		files: true,
 		hidden: false,
 	}, _opts);
-console.log('fs.glob', path, _opts);
+//~ console.log('fs.glob', path, _opts);
 	var st, f,
 		regExp = opts.filter=='*' || opts.filter=='' ? false : new RegExp('('+opts.filter.replace(/;/g,'|').replace(/\./g,'\\.').replace(/\*/g,'.*')+')$');
 		files = fs.readdirSync(path)
@@ -113,6 +113,21 @@ process.on('message', function(m, skt) {
 		console.log('Child died...');
 		if (term) term.destroy();
 		process.exit(0);
+		break;
+	case 'access_check':
+		//~ var m = {o: 'access_check', d: realPath, c: 'r', uid: accessCheckUID++};
+//~ console.log('xtcWS => access_check: ', m);
+		fs.open(m.d, m.c, function(err, fd) {
+			if ( err ) {
+				m.r = 0;
+			}
+			else {
+				m.r = 1;
+				fs.closeSync(fd);
+			}
+//~ console.log('xtcWS => access_check: response =>', m);
+			process.send(m);
+		});
 		break;
 	}
 });

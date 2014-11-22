@@ -20,6 +20,9 @@ var settings = require('./config.js')
 	, userid = require('userid')
 	, pam = require('authenticate-pam')
 	, cutomSender = require('express/node_modules/send/lib/send')
+	, userChild = {}
+	, accessCheckUID = 1
+	, accessCheckMap = {} //used to map req/reply for file access between main node and child node
 ;
 
 sessDb.serialize(function() {
@@ -40,6 +43,33 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
+//load up users file for future reference
+//TODO: refresh this file every once in a while?
+var usersInfo = {};
+const UINFO_UID = 1;
+const UINFO_GID = 2;
+const UINFO_HOME = 4;
+
+function load_user_info() {
+	var res = fs.readFileSync('/etc/passwd');
+	var u, lines = res.toString().split("\n");
+	for(var i=0; i<lines.length;i++) {
+		u = lines[i].split(':');
+		usersInfo[u[0]] = u.slice(1);
+	}
+}
+load_user_info();
+
+function user_info(user) {
+	if ( !usersInfo.hasOwnProperty(user) ) return;
+	return {
+		uid: parseInt(usersInfo[user][UINFO_UID]),
+		gid: parseInt(usersInfo[user][UINFO_GID]),
+		home: usersInfo[user][UINFO_HOME],
+	};
+}
+
+
 //~ console.log(Object.keys(app.configure)); process.exit(0);
 
 //Routes
@@ -48,14 +78,14 @@ app.get('/term.js', function (req, res) {
 	res.sendfile(__dirname+'/node_modules/term.js/src/term.js');
 });
 
-app.get('/jFresh.js', function (req, res) {
+app.get('/xtc.js', function (req, res) {
 	var tpls = fs.readdirSync(__dirname + '/tpls')
 		, data
 	;
 	
 	res.set('Content-Type', 'text/javascript;charset=utf-8');
 	
-	data = fs.readFileSync(__dirname+'/jFresh-client-engine.js', 'utf-8');
+	data = fs.readFileSync(__dirname+'/xtc-client-engine.js', 'utf-8');
 	res.write(data);
 	res.write("\r\n");
 	
@@ -75,76 +105,35 @@ app.get('/file/*', function (req, res) {
 	var uKey = req.headers.cookie.match(/UKEY=([\d\w]{8}-[\d\w]{4}-[\d\w]{4}-[\d\w]{4}-[\d\w]{12})/);
 	if ( !uKey ) return;
 	uKey = uKey[1];
-	
-	var sendfile = function(path, options, fn){
-		var self = this
-			, req = self.req
-			, next = this.req.next
-			, options = options || {}
-			, done;
-
-		// support function as second arg
-		if ('function' == typeof options) {
-			fn = options;
-			options = {};
-		}
-
-		// socket errors
-		req.socket.on('error', error);
-
-		// errors
-		function error(err) {
-			if (done) return;
-			done = true;
-
-			// clean up
-			cleanup();
-			if (!self.headerSent) self.removeHeader('Content-Disposition');
-
-			// callback available
-			if (fn) return fn(err);
-
-			// list in limbo if there's no callback
-			if (self.headerSent) return;
-
-			// delegate
-			next(err);
-		}
-
-		// streaming
-		function stream() {
-			if (done) return;
-			cleanup();
-			if (fn) self.on('finish', fn);
-		}
-
-		// cleanup
-		function cleanup() {
-			req.socket.removeListener('error', error);
-		}
-
-		// transfer
-		var file = cutomSender(req, path);
-		if (options.root) file.root(options.root);
-		file.hidden(true);
-		file.maxage(options.maxAge || 0);
-		file.on('error', error);
-		file.on('directory', next);
-		file.on('stream', stream);
-		file.pipe(this);
-		this.on('finish', cleanup);
-	};
-	
+	var userId;
 	var realPath = path.resolve( req.url.substr('/file'.length) );
-	//TODO: check user has access to file!
-	console.log('Serving', realPath);
-	sendfile.call(res, realPath);
+	
+	userSessionCmd(uKey, function(user) {
+		userId = user;
+		if ( userChild.hasOwnProperty(user) ) {
+			var m = {o: 'access_check', d: realPath, c: 'r', uid: accessCheckUID++};
+//~ console.log('FileServer:', m);
+			if ( accessCheckUID > 1000000 ) accessCheckUID = 1;
+			accessCheckMap[ m.uid ] = res;
+			userChild[user].send(m);
+		}
+		else {
+			console.log('User file access failed [0]: UKEY=%s, FILE=%s', uKey, req.url);
+			res.end();
+		}
+	}, function() {
+		if (!userId) {
+			console.log('User file access failed [1]: UKEY=%s, FILE=%s', uKey, req.url);
+			res.end();
+		}
+	})
+	
 });
 
 app.get('/', function (req, res) {
-	var jFreshTag = '<!--JFRESH-->'
+	var xtcTag = '<!--XTC-->'
 		, indexTpl = fs.readFileSync(__dirname + '/public/start.html', 'utf-8')
-		, idxStart = indexTpl.indexOf(jFreshTag)
+		, idxStart = indexTpl.indexOf(xtcTag)
 		, tpls = fs.readdirSync(__dirname + '/tpls')
 		, data
 		, ext
@@ -163,7 +152,7 @@ app.get('/', function (req, res) {
 
 	}
 	
-	res.write( indexTpl.substr(idxStart+jFreshTag.length) );
+	res.write( indexTpl.substr(idxStart+xtcTag.length) );
 	res.end();
 });
 
@@ -172,10 +161,82 @@ app.get('/', function (req, res) {
 io.set('log level', 1);
 
 server.listen(app.get('port'), function(){
-  console.log('jFresh is running on port ' + app.get('port'));
+  console.log('xtc is running on port ' + app.get('port'));
 });
 
-var ss;
+var sendfile = function(path, options, fn){
+	var self = this
+		, req = self.req
+		, next = this.req.next
+		, options = options || {}
+		, done;
+
+	// support function as second arg
+	if ('function' == typeof options) {
+		fn = options;
+		options = {};
+	}
+
+	// socket errors
+	req.socket.on('error', error);
+
+	// errors
+	function error(err) {
+		if (done) return;
+		done = true;
+
+		// clean up
+		cleanup();
+		if (!self.headerSent) self.removeHeader('Content-Disposition');
+
+		// callback available
+		if (fn) return fn(err);
+
+		// list in limbo if there's no callback
+		if (self.headerSent) return;
+
+		// delegate
+		next(err);
+	}
+
+	// streaming
+	function stream() {
+		if (done) return;
+		cleanup();
+		if (fn) self.on('finish', fn);
+	}
+
+	// cleanup
+	function cleanup() {
+		req.socket.removeListener('error', error);
+	}
+
+	// transfer
+	var file = cutomSender(req, path);
+	if (options.root) file.root(options.root);
+	file.hidden(true);
+	file.maxage(options.maxAge || 0);
+	file.on('error', error);
+	file.on('directory', next);
+	file.on('stream', stream);
+	file.pipe(this);
+	this.on('finish', cleanup);
+};
+
+function onFileAccessCheckResult(m) {
+//~ console.log('xtc => access_check RESPONSE: ', m, Object.keys(accessCheckMap));
+	if ( !accessCheckMap.hasOwnProperty(m.uid) ) return;
+	var res = accessCheckMap[m.uid];
+	if ( m.r ) {
+		console.log('Serving: ', m.d);
+		sendfile.call(res, m.d);
+	}
+	else {
+		console.log('WARN: Failed Serving', m.d);
+		res.end();
+	}
+	delete accessCheckMap[m.uid];
+};
 
 
 function uuid(
@@ -212,21 +273,27 @@ function run_shell(cmd, args, cb, end) {
 function on_user_login(socket,usr,uid) {
 	var env = process.env;
 	var cwd = process.cwd;
+	
+	var nfo = user_info(usr);
+//~ console.log('USERINFO', usr, nfo);
 
 	var cp_opt = {
 		//in,out,err
 		stdio: ['ignore', 'ignore', 'ignore'],
-		env: env,
-		cwd: cwd,
+		env: {},
+		cwd: nfo.home,
 		detached: false,
-		uid: userid.uid(usr),
-		gid: userid.gid(usr),
+		uid: nfo.uid,
+		gid: nfo.gid,
 	};
-	var child = child_process.fork('jFreshWS.js', [], cp_opt);
+	var child = child_process.fork(__dirname+'/xtcWS.js', [], cp_opt);
 	child.on('message', function(m) {
+//~ console.log('child message:',m.o=='access_check', m);
+		if ( m.o=='access_check' ) return onFileAccessCheckResult(m);
 		socket.emit('d', m);
 	});
-	socket.emit('sessionKey', {user: usr, key: uid});
+	if ( !userChild.hasOwnProperty(usr) ) userChild[usr] = child;
+	socket.emit('sessionKey', {user: usr, key: uid, home: nfo.home});
 	
 	sessDb.serialize(function() {
 		var stmt = sessDb.prepare("insert or replace into sessions(key,user) values(?,?)");
@@ -241,10 +308,18 @@ function on_user_login(socket,usr,uid) {
 	socket.on('disconnect', function() {
 		console.log('websocket client gone byebye!');
 		if ( child ) {
+			if ( child === userChild[usr] ) delete userChild[usr];
 			child.send({o: 'die'});
 		}
 	});
 
+}
+
+function userSessionCmd(key, okCb, waitCb) {
+	return sessDb.get("SELECT user FROM sessions WHERE key=?", key, function(err, row) {
+		if ( !row || err ) return okCb();
+		return okCb(row.user);
+	}).wait(waitCb);
 }
 
 io.sockets.on('connection', function (socket) {
@@ -274,14 +349,15 @@ io.sockets.on('connection', function (socket) {
 			console.log('Invalid UUID used for relog!', uid);
 			socket.close();
 		}
-			sessDb.get("SELECT user FROM sessions WHERE key=?", uid, function(err, row) {
-				if ( !row ) return;
-				console.log("Resuming session for: "+row.user);
-				userid = row.user;
-				on_user_login(socket, row.user, uid);
-  		}).wait(function() {
-				if ( !userid ) socket.emit('autherror', 'Failed to resume session');
-			});
+		
+		userSessionCmd(uid, function(user) {
+			if ( !user ) return;
+			console.log("Resuming session for: "+user);
+			userid = user;
+			on_user_login(socket, user, uid);
+		}, function() {
+			if ( !userid ) socket.emit('autherror', 'Failed to resume session');
+		});
 		
 	});
 	

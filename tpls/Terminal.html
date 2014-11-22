@@ -21,7 +21,7 @@
 }
 </style>
 
-<template id="jFresh.Terminal">
+<template id="XTC.Terminal">
 	<div class="terminal-wrapper" fn="SocketIO Terminal"  Terminal-skt="socketIO">
 	</div>
 </template>
@@ -32,7 +32,7 @@
 
 TERM_COUNT=1;
 
-jFresh.fn.Terminal = function(el, opts) {
+xtc.fn.Terminal = function(el, opts) {
 	var me = this;
 	this.opts = opts;
 	this.skt = el[ this.opts.skt ]; //in case we want to use something else than PhpWebSocket
@@ -85,7 +85,7 @@ jFresh.fn.Terminal = function(el, opts) {
 	
 	this.term.on('title', function(title) {
 		//~ console.log('TERM TITLE', title);
-		me.el.dispatchEvent(new CustomEvent('App.title', {detail: title + ' - '+jFresh.fn.Terminal.appInfo.title}) );
+		me.el.dispatchEvent(new CustomEvent('App.title', {detail: title + ' - '+xtc.fn.Terminal.appInfo.title}) );
 	});
 	
 	
@@ -109,11 +109,11 @@ jFresh.fn.Terminal = function(el, opts) {
 	return el;
 };
 
-jFresh.fn.Terminal.appInfo = {
+xtc.fn.Terminal.appInfo = {
 	title: 'xTerm',
 };
 
-jFresh.fn.Terminal.defaults = {
+xtc.fn.Terminal.defaults = {
 	skt: 'phpWebSocket',
 	host: document.location.origin.replace('http://','ws://').replace('https://','wss://'),
 };

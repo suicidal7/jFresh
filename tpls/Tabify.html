@@ -44,7 +44,7 @@
 </style>
 
 <script type="text/javascript">
-jFresh.fn.Tabify = function(el, opts) {
+xtc.fn.Tabify = function(el, opts) {
 	var me = this;
 	me.el= el;
 	me.opts= opts;
@@ -82,21 +82,23 @@ jFresh.fn.Tabify = function(el, opts) {
 	}, true);
 };
 
-jFresh.fn.Tabify.defaults = {
+xtc.fn.Tabify.defaults = {
 };
 
-jFresh.fn.Tabify.prototype = {
+xtc.fn.Tabify.prototype = {
 	addTab: function(el, opts) {
-		opts = jFresh.extend(true, {
+		opts = xtc.extend(true, {
 			title: el.getAttribute('tab-title') || "Tab",
-			uid: el.getAttribute('tab-uid')||jFresh.uuid(),
+			uid: 'tab-'+xtc.uuid()//el.getAttribute('tab-uid')||xtc.uuid(),
 		}, opts);
 		var me = this;
 		
+		el.setAttribute('tab-uid', opts.uid);
 		el.hide();
 		//todo: make this a template?
 		var lnk = document.createElement('a');
-		lnk.setAttribute('href', '#'+opts.uid);
+		lnk.setAttribute('href', el.getAttribute('data-uid') || '');
+		lnk.setAttribute('tab-key', opts.uid);
 		lnk.innerHTML = opts.title;
 		me.tabs.appendChild( lnk );
 		if ( !me.el.contains(el) ) me.el.appendChild(el);
@@ -111,7 +113,7 @@ jFresh.fn.Tabify.prototype = {
 			tabEl = me.tabs.querySelector('[href="#'+tabEl+'"]');
 		}
 		else {
-			uid = tabEl.getAttribute('href').substr(1);
+			uid = tabEl.getAttribute('tab-key');
 		}
 		if ( !tabEl ) return;
 		
@@ -128,8 +130,20 @@ jFresh.fn.Tabify.prototype = {
 		bdy.show();
 		
 		me._activeTab = tabEl;
+		me.el.dispatchEvent(new CustomEvent('Tabify.setActive', {detail: bdy}));
 	},
 	
+	cycle: function(dir) {
+		var me = this;
+		
+		if ( !dir ) dir = 1;
+		if ( !me._activeTab ) return; //should be at least 1 active tab ^^
+		
+		var next = me._activeTab[dir>0 ? 'nextSibling' : 'previousSibling'];
+		if ( !next ) next = dir>0 ? me.tabs.firstChild : me.tabs.lastChild;
+		if ( !next ) return; //WTF?
+		me.setActive(next);
+	}
 };
 
 
